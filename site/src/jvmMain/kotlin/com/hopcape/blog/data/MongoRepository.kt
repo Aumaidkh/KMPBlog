@@ -1,5 +1,6 @@
 package com.hopcape.blog.data
 
+import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.User
 
 interface MongoRepository {
@@ -7,4 +8,5 @@ interface MongoRepository {
 
     suspend fun checkUserId(userId: String): Boolean
 
+    suspend fun addPost(post: Post): Boolean
 }

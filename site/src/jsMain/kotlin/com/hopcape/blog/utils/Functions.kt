@@ -8,9 +8,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.hopcape.blog.navigation.Screen
 import com.varabyte.kobweb.compose.foundation.layout.Box
+import com.varabyte.kobweb.compose.ui.Modifier
+import com.varabyte.kobweb.compose.ui.graphics.Colors
+import com.varabyte.kobweb.compose.ui.modifiers.border
+import com.varabyte.kobweb.compose.ui.modifiers.outline
 import com.varabyte.kobweb.core.rememberPageContext
 import com.varabyte.kobweb.silk.components.text.SpanText
 import kotlinx.browser.localStorage
+import org.jetbrains.compose.web.css.LineStyle
+import org.jetbrains.compose.web.css.px
 import org.w3c.dom.get
 import org.w3c.dom.set
 
@@ -42,4 +48,18 @@ fun logout(){
     localStorage["remember"] = "false"
     localStorage["userId"] = ""
     localStorage["username"] = ""
+}
+
+fun Modifier.noBorder(): Modifier {
+    return this
+        .border(
+            width = 0.px,
+            color = Colors.Transparent,
+            style = LineStyle.None
+        )
+        .outline(
+            width = 0.px,
+            color = Colors.Transparent,
+            style = LineStyle.None
+        )
 }

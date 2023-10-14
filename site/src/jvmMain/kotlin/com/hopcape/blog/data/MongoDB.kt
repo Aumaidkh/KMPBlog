@@ -1,5 +1,6 @@
 package com.hopcape.blog.data
 
+import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.User
 import com.hopcape.blog.utils.Constants.CONNECTION_STRING
 import com.hopcape.blog.utils.Constants.DATABASE_NAME
@@ -28,6 +29,7 @@ class MongoDB(private val context: InitApiContext): MongoRepository {
     private val client = MongoClient.create(CONNECTION_STRING)
     private val database = client.getDatabase(DATABASE_NAME)
     private val userCollection = database.getCollection<User>("user")
+    private val postCollection = database.getCollection<Post>("post")
     override suspend fun checkUserExistence(user: User): User? {
         return try {
             userCollection.find(
@@ -49,6 +51,17 @@ class MongoDB(private val context: InitApiContext): MongoRepository {
             )
             documentCount > 0
         } catch (e: Exception){
+            context.logger.error(e.message.toString())
+            false
+        }
+    }
+
+    override suspend fun addPost(post: Post): Boolean {
+        return try {
+            postCollection.insertOne(
+                document = post
+            ).wasAcknowledged()
+        }catch (e: Exception){
             context.logger.error(e.message.toString())
             false
         }

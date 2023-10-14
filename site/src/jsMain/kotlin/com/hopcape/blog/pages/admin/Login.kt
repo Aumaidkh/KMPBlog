@@ -14,6 +14,7 @@ import com.hopcape.blog.utils.Constants.FONT_FAMILY
 import com.hopcape.blog.utils.Id
 import com.hopcape.blog.utils.Resource
 import com.hopcape.blog.utils.checkUserExistence
+import com.hopcape.blog.utils.noBorder
 import com.varabyte.kobweb.compose.css.Cursor
 import com.varabyte.kobweb.compose.css.FontWeight
 import com.varabyte.kobweb.compose.css.TextAlign
@@ -137,11 +138,7 @@ fun LoginScreen() {
                     .fontFamily(FONT_FAMILY)
                     .fontWeight(FontWeight.Medium)
                     .fontSize(14.px)
-                    .border(
-                        width = 0.px,
-                        style = LineStyle.None,
-                        color = Colors.Transparent
-                    )
+                    .noBorder()
                     .cursor(Cursor.Pointer)
                     .onClick {
                         scope.launch {
@@ -171,9 +168,6 @@ fun LoginScreen() {
                         }
 
                     }
-                    .outline(
-                        width = 0.px
-                    )
                     .toAttrs()
             ) {
                 SpanText(

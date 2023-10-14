@@ -1,5 +1,6 @@
 package com.hopcape.blog.utils
 
+import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.RandomJoke
 import com.hopcape.blog.models.User
 import com.varabyte.kobweb.browser.api

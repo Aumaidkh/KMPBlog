@@ -15,6 +15,7 @@ import com.hopcape.blog.utils.Constants.FONT_FAMILY
 import com.hopcape.blog.utils.Constants.SIDE_PANEL_WIDTH
 import com.hopcape.blog.utils.Id
 import com.hopcape.blog.utils.isUserLoggedIn
+import com.hopcape.blog.utils.noBorder
 import com.varabyte.kobweb.compose.css.Cursor
 import com.varabyte.kobweb.compose.css.FontWeight
 import com.varabyte.kobweb.compose.css.Overflow
@@ -31,7 +32,6 @@ import com.varabyte.kobweb.compose.ui.Modifier
 import com.varabyte.kobweb.compose.ui.attrsModifier
 import com.varabyte.kobweb.compose.ui.graphics.Colors
 import com.varabyte.kobweb.compose.ui.modifiers.backgroundColor
-import com.varabyte.kobweb.compose.ui.modifiers.border
 import com.varabyte.kobweb.compose.ui.modifiers.borderRadius
 import com.varabyte.kobweb.compose.ui.modifiers.classNames
 import com.varabyte.kobweb.compose.ui.modifiers.color
@@ -49,7 +49,6 @@ import com.varabyte.kobweb.compose.ui.modifiers.margin
 import com.varabyte.kobweb.compose.ui.modifiers.maxHeight
 import com.varabyte.kobweb.compose.ui.modifiers.maxWidth
 import com.varabyte.kobweb.compose.ui.modifiers.onClick
-import com.varabyte.kobweb.compose.ui.modifiers.outline
 import com.varabyte.kobweb.compose.ui.modifiers.overflow
 import com.varabyte.kobweb.compose.ui.modifiers.padding
 import com.varabyte.kobweb.compose.ui.modifiers.resize
@@ -69,7 +68,6 @@ import com.varabyte.kobweb.silk.components.text.SpanText
 import com.varabyte.kobweb.silk.theme.breakpoint.rememberBreakpoint
 import kotlinx.browser.document
 import org.jetbrains.compose.web.attributes.InputType
-import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.A
 import org.jetbrains.compose.web.dom.Button
@@ -79,6 +77,21 @@ import org.jetbrains.compose.web.dom.Li
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.TextArea
 import org.jetbrains.compose.web.dom.Ul
+
+
+data class CreatePageUiEvent(
+    var id: String = "",
+    var title: String = "",
+    var subtitle: String = "",
+    var content: String = "",
+    var thumbnail: String = "",
+    var thumbnailInputDisabled: Boolean = true,
+    var category: Category = Category.Programming,
+    var main: Boolean = false,
+    var popular: Boolean = false,
+    var sponsored: Boolean = false,
+    var editorVisibility: Boolean = true
+)
 
 @Page
 @Composable
@@ -91,29 +104,10 @@ fun CreatePage() {
 @Composable
 fun CreateScreen() {
     val breakpoint = rememberBreakpoint()
-    var popularSwitch by remember {
-        mutableStateOf(false)
-    }
-    var mainSwitch by remember {
-        mutableStateOf(false)
-    }
-    var sponsoredSwitch by remember {
-        mutableStateOf(false)
-    }
 
-    var thumbnailInputDisabled by remember {
-        mutableStateOf(true)
+    var uiState by remember {
+        mutableStateOf(CreatePageUiEvent())
     }
-
-    var selectedCategory by remember {
-        mutableStateOf(Category.Programming)
-    }
-
-    var filename by remember {
-        mutableStateOf("")
-    }
-
-    var editorVisibility by remember { mutableStateOf(true) }
 
     AdminPageLayout {
         Box(
@@ -143,9 +137,11 @@ fun CreateScreen() {
                     ) {
                         Switch(
                             modifier = Modifier.margin(right = 8.px),
-                            checked = popularSwitch,
+                            checked = uiState.popular,
                             onCheckedChange = {
-                                popularSwitch = it
+                                uiState = uiState.copy(
+                                    popular = it
+                                )
                             },
                             size = SwitchSize.LG,
                             colorScheme = SwitchColorPalette
@@ -168,9 +164,11 @@ fun CreateScreen() {
                     ) {
                         Switch(
                             modifier = Modifier.margin(right = 8.px),
-                            checked = mainSwitch,
+                            checked = uiState.main,
                             onCheckedChange = {
-                                mainSwitch = it
+                                uiState = uiState.copy(
+                                    main = it
+                                )
                             },
                             size = SwitchSize.LG,
                             colorScheme = SwitchColorPalette
@@ -193,9 +191,11 @@ fun CreateScreen() {
                     ) {
                         Switch(
                             modifier = Modifier.margin(right = 8.px),
-                            checked = sponsoredSwitch,
+                            checked = uiState.sponsored,
                             onCheckedChange = {
-                                sponsoredSwitch = it
+                                uiState = uiState.copy(
+                                    sponsored = it
+                                )
                             },
                             size = SwitchSize.LG,
                             colorScheme = SwitchColorPalette
@@ -217,16 +217,7 @@ fun CreateScreen() {
                         .padding(leftRight = 20.px)
                         .backgroundColor(Theme.LightGray.rgb)
                         .borderRadius(r = 8.px)
-                        .border(
-                            width = 0.px,
-                            style = LineStyle.None,
-                            color = Colors.Transparent
-                        )
-                        .outline(
-                            width = 0.px,
-                            style = LineStyle.None,
-                            color = Colors.Transparent
-                        )
+                        .noBorder()
                         .fontFamily(FONT_FAMILY)
                         .fontSize(16.px)
                         .toAttrs() {
@@ -242,16 +233,7 @@ fun CreateScreen() {
                         .padding(leftRight = 20.px)
                         .backgroundColor(Theme.LightGray.rgb)
                         .borderRadius(r = 8.px)
-                        .border(
-                            width = 0.px,
-                            style = LineStyle.None,
-                            color = Colors.Transparent
-                        )
-                        .outline(
-                            width = 0.px,
-                            style = LineStyle.None,
-                            color = Colors.Transparent
-                        )
+                        .noBorder()
                         .fontFamily(FONT_FAMILY)
                         .fontSize(16.px)
                         .toAttrs() {
@@ -260,9 +242,11 @@ fun CreateScreen() {
                     type = InputType.Text
                 )
                 CategoryDropDown(
-                    selectedCategory = selectedCategory,
+                    selectedCategory = uiState.category,
                     onCategorySelect = {
-                        selectedCategory = it
+                        uiState = uiState.copy(
+                            category = it
+                        )
                     }
                 )
                 Row(
@@ -274,9 +258,11 @@ fun CreateScreen() {
                 ) {
                     Switch(
                         modifier = Modifier.margin(right = 8.px),
-                        checked = !thumbnailInputDisabled,
+                        checked = !uiState.thumbnailInputDisabled,
                         onCheckedChange = {
-                            thumbnailInputDisabled = !it
+                           uiState = uiState.copy(
+                               thumbnailInputDisabled = !it
+                           )
                         },
                         size = SwitchSize.MD,
                         colorScheme = SwitchColorPalette
@@ -291,53 +277,57 @@ fun CreateScreen() {
                 }
 
                 ThumbnailUploader(
-                    thumbnail = filename,
-                    thumbnailInputDisabled = thumbnailInputDisabled,
+                    thumbnail = uiState.thumbnail,
+                    thumbnailInputDisabled = uiState.thumbnailInputDisabled,
                     onThumbnailSelect = { fileName,file ->
-                        filename = fileName
+                        uiState = uiState.copy(
+                            thumbnail = fileName
+                        )
                     }
                 )
 
                 EditorControls(
                     breakpoint = breakpoint,
-                    editorVisibility = editorVisibility,
+                    editorVisibility = uiState.editorVisibility,
                     onEditorVisibilityChange = {
-                        editorVisibility = !editorVisibility
+                        uiState = uiState.copy(
+                            editorVisibility = !uiState.editorVisibility
+                        )
                     }
                 )
 
                 Editor(
-                    editorVisibility = editorVisibility
+                    editorVisibility = uiState.editorVisibility
                 )
 
-                Button(
-                    attrs = Modifier
-                        .fillMaxWidth()
-                        .height(54.px)
-                        .margin(top = 24.px)
-                        .padding(leftRight = 24.px)
-                        .borderRadius(r = 4.px)
-                        .border(
-                            width = 0.px,
-                            color = Colors.Transparent,
-                            style = LineStyle.None
-                        )
-                        .outline(
-                            width = 0.px,
-                            color = Colors.Transparent,
-                            style = LineStyle.None
-                        )
-                        .backgroundColor(Theme.Primary.rgb)
-                        .color(Colors.White)
-                        .onClick {
-
-                        }
-                        .toAttrs()
-                ) {
-                    SpanText("Create")
-                }
+                CreateButton(
+                    onClick = {}
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun CreateButton(
+    onClick: () -> Unit
+) {
+    Button(
+        attrs = Modifier
+            .fillMaxWidth()
+            .height(54.px)
+            .margin(top = 24.px)
+            .padding(leftRight = 24.px)
+            .borderRadius(r = 4.px)
+            .noBorder()
+            .backgroundColor(Theme.Primary.rgb)
+            .color(Colors.White)
+            .onClick {
+                onClick()
+            }
+            .toAttrs()
+    ) {
+        SpanText("Create")
     }
 }
 
@@ -425,16 +415,7 @@ fun ThumbnailUploader(
                 .borderRadius(r=8.px)
                 .fontSize(16.px)
                 .fontFamily(FONT_FAMILY)
-                .border(
-                    width = 0.px,
-                    style = LineStyle.None,
-                    color = Colors.Transparent
-                )
-                .outline(
-                    width = 0.px,
-                    style = LineStyle.None,
-                    color = Colors.Transparent
-                )
+                .noBorder()
                 .thenIf(
                     condition = thumbnailInputDisabled,
                     other = Modifier.disabled()
@@ -459,16 +440,7 @@ fun ThumbnailUploader(
                 .padding(leftRight = 24.px)
                 .backgroundColor(if (thumbnailInputDisabled) Theme.Primary.rgb else Theme.Gray.rgb)
                 .color(if (thumbnailInputDisabled) Colors.White else Theme.DarkGray.rgb)
-                .border(
-                    width = 0.px,
-                    style = LineStyle.None,
-                    color = Colors.Transparent
-                )
-                .outline(
-                    width = 0.px,
-                    style = LineStyle.None,
-                    color = Colors.Transparent
-                )
+                .noBorder()
                 .fontFamily(FONT_FAMILY)
                 .fontSize(14.px)
                 .fontWeight(FontWeight.Medium)
@@ -517,16 +489,7 @@ fun EditorControls(
                         .margin(topBottom = if (breakpoint < Breakpoint.SM) 12.px else 0.px)
                         .padding(leftRight = 24.px)
                         .borderRadius(r = 4.px)
-                        .border(
-                            width = 0.px,
-                            color = Colors.Transparent,
-                            style = LineStyle.None
-                        )
-                        .outline(
-                            width = 0.px,
-                            color = Colors.Transparent,
-                            style = LineStyle.None
-                        )
+                        .noBorder()
                         .backgroundColor(if (editorVisibility) Theme.LightGray.rgb else Theme.Primary.rgb)
                         .color(if (editorVisibility) Theme.DarkGray.rgb else Colors.White)
                         .onClick {
@@ -592,16 +555,7 @@ fun Editor(
                 .fontSize(16.px)
                 .backgroundColor(Theme.LightGray.rgb)
                 .borderRadius(r = 4.px)
-                .border(
-                    width = 0.px,
-                    style = LineStyle.None,
-                    color = Colors.Transparent
-                )
-                .outline(
-                    width = 0.px,
-                    style = LineStyle.None,
-                    color = Colors.Transparent
-                )
+                .noBorder()
                 .id(Id.editor)
                 .resize(
                     resize = Resize.None
@@ -623,16 +577,7 @@ fun Editor(
                 .padding(all = 20.px)
                 .backgroundColor(Theme.LightGray.rgb)
                 .borderRadius(r = 4.px)
-                .border(
-                    width = 0.px,
-                    style = LineStyle.None,
-                    color = Colors.Transparent
-                )
-                .outline(
-                    width = 0.px,
-                    style = LineStyle.None,
-                    color = Colors.Transparent
-                )
+                .noBorder()
                 .visibility(if (editorVisibility) Visibility.Hidden else Visibility.Visible)
                 .overflow(Overflow.Auto)
                 .scrollBehavior(ScrollBehavior.Smooth)
