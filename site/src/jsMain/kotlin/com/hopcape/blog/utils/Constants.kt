@@ -1,7 +1,7 @@
 package com.hopcape.blog.utils
 
 object Constants {
-    const val FONT_FAMILY = "Roboto"
+    const val FONT_FAMILY = "roboto"
     const val SIDE_PANEL_WIDTH = 250
     const val SECTION_PAGE_WIDTH = 1920
     const val COLLAPSED_PANEL_HEIGHT = 100
@@ -23,6 +23,7 @@ object Resource {
         const val quote = "/quote.svg"
         const val code = "/code-slash.svg"
         const val image = "/card-image.svg"
+        const val success = "/check-circle.svg"
     }
 
     object PathIcons {

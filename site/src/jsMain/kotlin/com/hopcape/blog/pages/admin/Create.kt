@@ -7,10 +7,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.hopcape.blog.components.AdminPageLayout
+import com.hopcape.blog.components.MessagePopup
 import com.hopcape.blog.models.Category
 import com.hopcape.blog.models.EditorKey
 import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.Theme
+import com.hopcape.blog.navigation.Screen
 import com.hopcape.blog.styles.EditorKeyStyle
 import com.hopcape.blog.styles.SwitchColorPalette
 import com.hopcape.blog.utils.Constants.FONT_FAMILY
@@ -60,6 +62,7 @@ import com.varabyte.kobweb.compose.ui.modifiers.visibility
 import com.varabyte.kobweb.compose.ui.thenIf
 import com.varabyte.kobweb.compose.ui.toAttrs
 import com.varabyte.kobweb.core.Page
+import com.varabyte.kobweb.core.rememberPageContext
 import com.varabyte.kobweb.silk.components.forms.Switch
 import com.varabyte.kobweb.silk.components.forms.SwitchSize
 import com.varabyte.kobweb.silk.components.graphics.Image
@@ -88,7 +91,7 @@ import org.w3c.dom.get
 import kotlin.js.Date
 
 
-data class CreatePageUiEvent(
+data class CreatePageUiState(
     var id: String = "",
     var title: String = "",
     var subtitle: String = "",
@@ -99,7 +102,8 @@ data class CreatePageUiEvent(
     var main: Boolean = false,
     var popular: Boolean = false,
     var sponsored: Boolean = false,
-    var editorVisibility: Boolean = true
+    var editorVisibility: Boolean = true,
+    var errorMessage : String? = null
 )
 
 @Page
@@ -113,9 +117,10 @@ fun CreatePage() {
 @Composable
 fun CreateScreen() {
     val breakpoint = rememberBreakpoint()
+    val context = rememberPageContext()
 
     var uiState by remember {
-        mutableStateOf(CreatePageUiEvent())
+        mutableStateOf(CreatePageUiState())
     }
 
     val scope = rememberCoroutineScope()
@@ -354,19 +359,37 @@ fun CreateScreen() {
                                     )
                                 )
                                 if (result){
-                                    println("Successful")
+                                    context
+                                        .router
+                                        .navigateTo(
+                                            pathQueryAndFragment = Screen.AdminSuccess.route
+                                        )
                                 } else {
                                     println("Error Adding Post")
                                 }
                             }
 
                         } else {
-                            println("Please fill all fields")
+                            scope.launch {
+                                uiState = uiState.copy(
+                                    errorMessage = "Please Fill All the fields"
+                                )
+                            }
                         }
                     }
                 )
             }
         }
+    }
+    if (uiState.errorMessage != null){
+        MessagePopup(
+            message = uiState.errorMessage ?: "",
+            onDialogDismissed = {
+                uiState = uiState.copy(
+                    errorMessage = null
+                )
+            }
+        )
     }
 }
 
