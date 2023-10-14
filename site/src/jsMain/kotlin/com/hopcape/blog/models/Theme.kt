@@ -26,10 +26,26 @@ enum class Theme(
     ),
     HalfBlack(
         hex = "#000000",
-        rgb = rgba(r = 0, g = 0, b = 0,a = 30)
+        rgb = rgba(r = 0, g = 0, b = 0,a = 10)
     ),
     White(
         hex = "#ffffff",
         rgb = rgb(r = 255, g = 255, b = 255)
+    ),
+    Green(
+        hex = "#00FF94",
+        rgb = rgb(r = 0, g = 255, b = 148)
+    ),
+    Yellow(
+        hex = "#FFEC45",
+        rgb = rgb(r = 255, g = 236, b = 69)
+    ),
+    Red(
+        hex = "#FF6359",
+        rgb = rgb(r = 255, g = 90, b = 89)
+    ),
+    Purple(
+        hex = "#886DFF",
+        rgb = rgb(r = 139, g = 100, b = 255)
     )
 }
