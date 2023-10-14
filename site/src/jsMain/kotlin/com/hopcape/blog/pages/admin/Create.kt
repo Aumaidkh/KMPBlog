@@ -6,14 +6,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.hopcape.blog.components.AdminPageLayout
-import com.hopcape.blog.components.SidePanel
 import com.hopcape.blog.models.Category
+import com.hopcape.blog.models.EditorKey
 import com.hopcape.blog.models.Theme
-import com.hopcape.blog.utils.Constants
+import com.hopcape.blog.styles.EditorKeyStyle
+import com.hopcape.blog.styles.SwitchColorPalette
 import com.hopcape.blog.utils.Constants.FONT_FAMILY
 import com.hopcape.blog.utils.Constants.SIDE_PANEL_WIDTH
 import com.hopcape.blog.utils.isUserLoggedIn
 import com.varabyte.kobweb.compose.css.Cursor
+import com.varabyte.kobweb.compose.css.FontWeight
+import com.varabyte.kobweb.compose.file.loadDataUrlFromDisk
 import com.varabyte.kobweb.compose.foundation.layout.Arrangement
 import com.varabyte.kobweb.compose.foundation.layout.Box
 import com.varabyte.kobweb.compose.foundation.layout.Column
@@ -28,29 +31,37 @@ import com.varabyte.kobweb.compose.ui.modifiers.borderRadius
 import com.varabyte.kobweb.compose.ui.modifiers.classNames
 import com.varabyte.kobweb.compose.ui.modifiers.color
 import com.varabyte.kobweb.compose.ui.modifiers.cursor
+import com.varabyte.kobweb.compose.ui.modifiers.disabled
+import com.varabyte.kobweb.compose.ui.modifiers.fillMaxHeight
 import com.varabyte.kobweb.compose.ui.modifiers.fillMaxSize
 import com.varabyte.kobweb.compose.ui.modifiers.fillMaxWidth
 import com.varabyte.kobweb.compose.ui.modifiers.fontFamily
 import com.varabyte.kobweb.compose.ui.modifiers.fontSize
+import com.varabyte.kobweb.compose.ui.modifiers.fontWeight
 import com.varabyte.kobweb.compose.ui.modifiers.height
 import com.varabyte.kobweb.compose.ui.modifiers.margin
 import com.varabyte.kobweb.compose.ui.modifiers.maxWidth
 import com.varabyte.kobweb.compose.ui.modifiers.onClick
 import com.varabyte.kobweb.compose.ui.modifiers.outline
 import com.varabyte.kobweb.compose.ui.modifiers.padding
+import com.varabyte.kobweb.compose.ui.thenIf
 import com.varabyte.kobweb.compose.ui.toAttrs
 import com.varabyte.kobweb.core.Page
 import com.varabyte.kobweb.silk.components.forms.Switch
 import com.varabyte.kobweb.silk.components.forms.SwitchSize
+import com.varabyte.kobweb.silk.components.graphics.Image
 import com.varabyte.kobweb.silk.components.layout.SimpleGrid
 import com.varabyte.kobweb.silk.components.layout.numColumns
 import com.varabyte.kobweb.silk.components.style.breakpoint.Breakpoint
+import com.varabyte.kobweb.silk.components.style.toModifier
 import com.varabyte.kobweb.silk.components.text.SpanText
 import com.varabyte.kobweb.silk.theme.breakpoint.rememberBreakpoint
+import kotlinx.browser.document
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.A
+import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Li
 import org.jetbrains.compose.web.dom.Text
@@ -77,8 +88,16 @@ fun CreateScreen() {
         mutableStateOf(false)
     }
 
+    var thumbnailInputDisabled by remember {
+        mutableStateOf(true)
+    }
+
     var selectedCategory by remember {
         mutableStateOf(Category.Programming)
+    }
+
+    var filename by remember {
+        mutableStateOf("")
     }
 
     AdminPageLayout {
@@ -113,7 +132,8 @@ fun CreateScreen() {
                             onCheckedChange = {
                                 popularSwitch = it
                             },
-                            size = SwitchSize.LG
+                            size = SwitchSize.LG,
+                            colorScheme = SwitchColorPalette
                         )
                         SpanText(
                             modifier = Modifier
@@ -137,7 +157,8 @@ fun CreateScreen() {
                             onCheckedChange = {
                                 mainSwitch = it
                             },
-                            size = SwitchSize.LG
+                            size = SwitchSize.LG,
+                            colorScheme = SwitchColorPalette
                         )
                         SpanText(
                             modifier = Modifier
@@ -161,7 +182,8 @@ fun CreateScreen() {
                             onCheckedChange = {
                                 sponsoredSwitch = it
                             },
-                            size = SwitchSize.LG
+                            size = SwitchSize.LG,
+                            colorScheme = SwitchColorPalette
                         )
                         SpanText(
                             modifier = Modifier
@@ -228,6 +250,40 @@ fun CreateScreen() {
                         selectedCategory = it
                     }
                 )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .margin(topBottom = 12.px),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Switch(
+                        modifier = Modifier.margin(right = 8.px),
+                        checked = !thumbnailInputDisabled,
+                        onCheckedChange = {
+                            thumbnailInputDisabled = !it
+                        },
+                        size = SwitchSize.MD,
+                        colorScheme = SwitchColorPalette
+                    )
+                    SpanText(
+                        modifier = Modifier
+                            .fontFamily(FONT_FAMILY)
+                            .fontSize(14.px)
+                            .color(Theme.HalfBlack.rgb),
+                        text = "Paste an Image URL Instead"
+                    )
+                }
+
+                ThumbnailUploader(
+                    thumbnail = filename,
+                    thumbnailInputDisabled = thumbnailInputDisabled,
+                    onThumbnailSelect = { fileName,file ->
+                        filename = fileName
+                    }
+                )
+
+                EditorControls(breakpoint)
             }
         }
     }
@@ -293,5 +349,170 @@ fun CategoryDropDown(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun ThumbnailUploader(
+    thumbnail: String,
+    thumbnailInputDisabled: Boolean,
+    onThumbnailSelect: (String,String) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .margin(bottom = 20.px)
+            .height(54.px)
+    ) {
+        Input(
+            attrs = Modifier
+                .margin(right = 12.px)
+                .fillMaxSize()
+                .padding(leftRight = 20.px)
+                .backgroundColor(Theme.LightGray.rgb)
+                .borderRadius(r=8.px)
+                .fontSize(16.px)
+                .fontFamily(FONT_FAMILY)
+                .border(
+                    width = 0.px,
+                    style = LineStyle.None,
+                    color = Colors.Transparent
+                )
+                .outline(
+                    width = 0.px,
+                    style = LineStyle.None,
+                    color = Colors.Transparent
+                )
+                .thenIf(
+                    condition = thumbnailInputDisabled,
+                    other = Modifier.disabled()
+                )
+                .toAttrs {
+                      attr("placeholder","Thumbnail")
+                      attr("value",thumbnail)
+                },
+            type = InputType.Text,
+        )
+        Button(
+            attrs = Modifier
+                .onClick {
+                    document.loadDataUrlFromDisk(
+                        accept = "image/png, image/jpeg",
+                        onLoaded = {
+                            onThumbnailSelect(filename,it)
+                        }
+                    )
+                }
+                .fillMaxHeight()
+                .padding(leftRight = 24.px)
+                .backgroundColor(if (thumbnailInputDisabled) Theme.Primary.rgb else Theme.Gray.rgb)
+                .color(if (thumbnailInputDisabled) Colors.White else Theme.DarkGray.rgb)
+                .border(
+                    width = 0.px,
+                    style = LineStyle.None,
+                    color = Colors.Transparent
+                )
+                .outline(
+                    width = 0.px,
+                    style = LineStyle.None,
+                    color = Colors.Transparent
+                )
+                .fontFamily(FONT_FAMILY)
+                .fontSize(14.px)
+                .fontWeight(FontWeight.Medium)
+                .borderRadius(r = 8.px)
+                .thenIf(
+                    condition = !thumbnailInputDisabled,
+                    other = Modifier.disabled()
+                )
+                .toAttrs()
+        ) {
+            SpanText("Upload")
+        }
+    }
+}
+
+@Composable
+fun EditorControls(
+    breakpoint: Breakpoint
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        SimpleGrid(
+            modifier = Modifier
+                .fillMaxWidth(),
+            numColumns = numColumns(base = 1, sm = 2)
+        ){
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .backgroundColor(Theme.LightGray.rgb)
+                    .borderRadius(r = 4.px)
+                    .height(54.px)
+            ) {
+                EditorKey.values().forEach { key ->
+                    EditorKeyView(key)
+                }
+            }
+            Box(contentAlignment = Alignment.CenterEnd) {
+                Button(
+                    attrs = Modifier
+                        .height(54.px)
+                        .margin(topBottom = if (breakpoint < Breakpoint.SM) 12.px else 0.px)
+                        .padding(leftRight = 24.px)
+                        .borderRadius(r = 4.px)
+                        .border(
+                            width = 0.px,
+                            color = Colors.Transparent,
+                            style = LineStyle.None
+                        )
+                        .outline(
+                            width = 0.px,
+                            color = Colors.Transparent,
+                            style = LineStyle.None
+                        )
+                        .backgroundColor(Theme.LightGray.rgb)
+                        .color(Theme.DarkGray.rgb)
+                        .onClick { }
+                        .thenIf(
+                            condition = breakpoint < Breakpoint.SM,
+                            other = Modifier
+                                .fillMaxWidth()
+                        )
+                        .toAttrs()
+                ) {
+                    SpanText(
+                        modifier = Modifier
+                            .fontFamily(FONT_FAMILY)
+                            .fontSize(14.px)
+                            .fontWeight(FontWeight.Medium),
+                        text = "Preview"
+                    )
+                }
+            }
+        }
+        
+    }
+}
+
+@Composable
+fun EditorKeyView(
+    key: EditorKey
+) {
+    Box(
+        modifier = EditorKeyStyle
+            .toModifier()
+            .fillMaxHeight()
+            .padding(leftRight = 12.px)
+            .borderRadius(r = 4.px)
+            .cursor(Cursor.Pointer)
+            .onClick {  },
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            src = key.icon
+        )
     }
 }
