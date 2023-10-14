@@ -34,11 +34,18 @@ object Resource {
 }
 
 object Id {
+    // Login Section Ids
     const val usernameInput = "usernameInput"
     const val passwordInput = "passwordInput"
     const val svgParent = "svgParent"
     const val vectorIcon = "vectorIcon"
+
+    // Create Screen Ids
     const val navigationText = "navigationText"
     const val editor = "editor"
     const val editorPreview = "editorPreview"
+    const val titleInput = "titleInput"
+    const val subtitleInput = "subtitleInput"
+    const val thumbnailInput = "thumbnailInput"
+    const val contentInput = "contentInput"
 }

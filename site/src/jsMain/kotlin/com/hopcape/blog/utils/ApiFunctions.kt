@@ -90,3 +90,14 @@ suspend fun fetchRandomJoke(): RandomJoke?{
         }
     }
 }
+
+suspend fun addPost(post: Post): Boolean {
+    return try {
+        window.api.tryPost(
+            apiPath = "create-post",
+            body = Json.encodeToString(post).encodeToByteArray()
+        )?.decodeToString().toBoolean()
+    }catch (e: Exception){
+        false
+    }
+}

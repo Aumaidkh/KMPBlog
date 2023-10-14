@@ -4,16 +4,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.hopcape.blog.components.AdminPageLayout
 import com.hopcape.blog.models.Category
 import com.hopcape.blog.models.EditorKey
+import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.Theme
 import com.hopcape.blog.styles.EditorKeyStyle
 import com.hopcape.blog.styles.SwitchColorPalette
 import com.hopcape.blog.utils.Constants.FONT_FAMILY
 import com.hopcape.blog.utils.Constants.SIDE_PANEL_WIDTH
 import com.hopcape.blog.utils.Id
+import com.hopcape.blog.utils.addPost
 import com.hopcape.blog.utils.isUserLoggedIn
 import com.hopcape.blog.utils.noBorder
 import com.varabyte.kobweb.compose.css.Cursor
@@ -67,6 +70,8 @@ import com.varabyte.kobweb.silk.components.style.toModifier
 import com.varabyte.kobweb.silk.components.text.SpanText
 import com.varabyte.kobweb.silk.theme.breakpoint.rememberBreakpoint
 import kotlinx.browser.document
+import kotlinx.browser.localStorage
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.A
@@ -77,6 +82,10 @@ import org.jetbrains.compose.web.dom.Li
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.TextArea
 import org.jetbrains.compose.web.dom.Ul
+import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.HTMLTextAreaElement
+import org.w3c.dom.get
+import kotlin.js.Date
 
 
 data class CreatePageUiEvent(
@@ -108,6 +117,8 @@ fun CreateScreen() {
     var uiState by remember {
         mutableStateOf(CreatePageUiEvent())
     }
+
+    val scope = rememberCoroutineScope()
 
     AdminPageLayout {
         Box(
@@ -211,6 +222,7 @@ fun CreateScreen() {
                 }
                 Input(
                     attrs = Modifier
+                        .id(Id.titleInput)
                         .fillMaxWidth()
                         .height(54.px)
                         .margin(topBottom = 12.px)
@@ -227,6 +239,7 @@ fun CreateScreen() {
                 )
                 Input(
                     attrs = Modifier
+                        .id(Id.subtitleInput)
                         .fillMaxWidth()
                         .height(54.px)
                         .margin(bottom = 12.px)
@@ -301,7 +314,56 @@ fun CreateScreen() {
                 )
 
                 CreateButton(
-                    onClick = {}
+                    onClick = {
+
+                        uiState =
+                            uiState.copy(title = (document.getElementById(Id.titleInput) as HTMLInputElement).value)
+                        uiState =
+                            uiState.copy(thumbnail = (document.getElementById(Id.thumbnailInput) as HTMLInputElement).value)
+                        uiState =
+                            uiState.copy(content = (document.getElementById(Id.editor) as HTMLTextAreaElement).value)
+
+                        /**
+                         * Only if the get thumbnail by url is selected
+                         * update the thumbnail from the input field*/
+                        if(!uiState.thumbnailInputDisabled){
+                            uiState =
+                                uiState.copy(subtitle = (document.getElementById(Id.thumbnailInput) as HTMLInputElement).value)
+
+                        }
+
+                        if (
+                            uiState.title.isNotEmpty() &&
+                            uiState.subtitle.isNotEmpty() &&
+                            uiState.thumbnail.isNotEmpty() &&
+                            uiState.content.isNotEmpty()) {
+
+                            scope.launch {
+                                val result = addPost(
+                                    post = Post(
+                                        title = uiState.title,
+                                        author = localStorage["username"].toString(),
+                                        subtitle = uiState.subtitle,
+                                        date = Date.now().toLong(),
+                                        thumbnail = uiState.thumbnail,
+                                        content = uiState.content,
+                                        category = uiState.category,
+                                        popular = uiState.popular,
+                                        main = uiState.main,
+                                        sponsored = uiState.sponsored
+                                    )
+                                )
+                                if (result){
+                                    println("Successful")
+                                } else {
+                                    println("Error Adding Post")
+                                }
+                            }
+
+                        } else {
+                            println("Please fill all fields")
+                        }
+                    }
                 )
             }
         }
@@ -408,6 +470,7 @@ fun ThumbnailUploader(
     ) {
         Input(
             attrs = Modifier
+                .id(Id.thumbnailInput)
                 .margin(right = 12.px)
                 .fillMaxSize()
                 .padding(leftRight = 20.px)
