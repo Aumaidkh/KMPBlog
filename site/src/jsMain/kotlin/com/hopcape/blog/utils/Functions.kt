@@ -12,6 +12,7 @@ import com.varabyte.kobweb.core.rememberPageContext
 import com.varabyte.kobweb.silk.components.text.SpanText
 import kotlinx.browser.localStorage
 import org.w3c.dom.get
+import org.w3c.dom.set
 
 @Composable
 fun isUserLoggedIn(
@@ -35,4 +36,10 @@ fun isUserLoggedIn(
            SpanText("User Not Exists")
         }
     }
+}
+
+fun logout(){
+    localStorage["remember"] = "false"
+    localStorage["userId"] = ""
+    localStorage["username"] = ""
 }

@@ -1,6 +1,7 @@
 package com.hopcape.blog.pages.admin
 
 import androidx.compose.runtime.Composable
+import com.hopcape.blog.components.AdminPageLayout
 import com.hopcape.blog.components.SidePanel
 import com.hopcape.blog.utils.Constants
 import com.hopcape.blog.utils.isUserLoggedIn
@@ -23,17 +24,7 @@ fun PostsPage() {
 
 @Composable
 fun PostsScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ){
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .maxWidth(Constants.SECTION_PAGE_WIDTH.px)
-        ) {
-            SidePanel()
-        }
+    AdminPageLayout {
+
     }
 }

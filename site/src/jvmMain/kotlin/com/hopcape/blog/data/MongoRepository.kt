@@ -6,4 +6,5 @@ interface MongoRepository {
     suspend fun checkUserExistence(user: User): User?
 
     suspend fun checkUserId(userId: String): Boolean
+
 }
