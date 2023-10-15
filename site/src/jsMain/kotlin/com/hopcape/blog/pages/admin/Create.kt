@@ -22,6 +22,7 @@ import com.hopcape.blog.utils.Id
 import com.hopcape.blog.utils.addPost
 import com.hopcape.blog.utils.applyControlStyle
 import com.hopcape.blog.utils.applyStyle
+import com.hopcape.blog.utils.getEditor
 import com.hopcape.blog.utils.getSelectedText
 import com.hopcape.blog.utils.isUserLoggedIn
 import com.hopcape.blog.utils.noBorder
@@ -58,6 +59,7 @@ import com.varabyte.kobweb.compose.ui.modifiers.margin
 import com.varabyte.kobweb.compose.ui.modifiers.maxHeight
 import com.varabyte.kobweb.compose.ui.modifiers.maxWidth
 import com.varabyte.kobweb.compose.ui.modifiers.onClick
+import com.varabyte.kobweb.compose.ui.modifiers.onKeyDown
 import com.varabyte.kobweb.compose.ui.modifiers.overflow
 import com.varabyte.kobweb.compose.ui.modifiers.padding
 import com.varabyte.kobweb.compose.ui.modifiers.resize
@@ -639,6 +641,8 @@ fun EditorControls(
                         .color(if (editorVisibility) Theme.DarkGray.rgb else Colors.White)
                         .onClick {
                             onEditorVisibilityChange()
+                            document.getElementById(Id.editorPreview)?.innerHTML = getEditor().value
+                            js("hljs.highlightAll()") as Unit
                         }
                         .thenIf(
                             condition = breakpoint < Breakpoint.SM,
@@ -704,6 +708,15 @@ fun Editor(
                 .backgroundColor(Theme.LightGray.rgb)
                 .borderRadius(r = 4.px)
                 .noBorder()
+                .onKeyDown {
+                    if (it.code == "Enter" && it.shiftKey){
+                        applyStyle(
+                            controlStyle = ControlStyle.Break(
+                                selectedText = getSelectedText()
+                            )
+                        )
+                    }
+                }
                 .id(Id.editor)
                 .resize(
                     resize = Resize.None

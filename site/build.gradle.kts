@@ -20,6 +20,15 @@ kobweb {
             head.add {
                 script(
                     type = null,
+                    src = "/highlight.min.js",
+                    block = {}
+                )
+                link(
+                    rel = "stylesheet",
+                    href = "/github-dark.css"
+                )
+                script(
+                    type = null,
                     src = "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js",
                     block = {}
                 )
