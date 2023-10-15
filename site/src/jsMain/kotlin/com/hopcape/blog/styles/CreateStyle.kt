@@ -1,6 +1,5 @@
 package com.hopcape.blog.styles
 
-import com.hopcape.blog.models.EditorKey
 import com.hopcape.blog.models.Theme
 import com.varabyte.kobweb.compose.css.CSSTransition
 import com.varabyte.kobweb.compose.ui.Modifier

@@ -9,7 +9,8 @@ import androidx.compose.runtime.setValue
 import com.hopcape.blog.components.AdminPageLayout
 import com.hopcape.blog.components.MessagePopup
 import com.hopcape.blog.models.Category
-import com.hopcape.blog.models.EditorKey
+import com.hopcape.blog.models.ControlStyle
+import com.hopcape.blog.models.EditorControl
 import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.Theme
 import com.hopcape.blog.navigation.Screen
@@ -19,6 +20,9 @@ import com.hopcape.blog.utils.Constants.FONT_FAMILY
 import com.hopcape.blog.utils.Constants.SIDE_PANEL_WIDTH
 import com.hopcape.blog.utils.Id
 import com.hopcape.blog.utils.addPost
+import com.hopcape.blog.utils.applyControlStyle
+import com.hopcape.blog.utils.applyStyle
+import com.hopcape.blog.utils.getSelectedText
 import com.hopcape.blog.utils.isUserLoggedIn
 import com.hopcape.blog.utils.noBorder
 import com.varabyte.kobweb.compose.css.Cursor
@@ -564,8 +568,13 @@ fun EditorControls(
                     .borderRadius(r = 4.px)
                     .height(54.px)
             ) {
-                EditorKey.values().forEach { key ->
-                    EditorKeyView(key)
+                EditorControl.values().forEach { control ->
+                    EditorControlView(
+                        control = control,
+                        onClick = {
+                            applyControlStyle(control)
+                        }
+                    )
                 }
             }
             Box(contentAlignment = Alignment.CenterEnd) {
@@ -603,8 +612,9 @@ fun EditorControls(
 }
 
 @Composable
-fun EditorKeyView(
-    key: EditorKey
+fun EditorControlView(
+    control: EditorControl,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = EditorKeyStyle
@@ -613,11 +623,13 @@ fun EditorKeyView(
             .padding(leftRight = 12.px)
             .borderRadius(r = 4.px)
             .cursor(Cursor.Pointer)
-            .onClick {  },
+            .onClick {
+                onClick()
+            },
         contentAlignment = Alignment.Center
     ) {
         Image(
-            src = key.icon
+            src = control.icon
         )
     }
 }

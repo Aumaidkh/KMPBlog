@@ -2,7 +2,7 @@ package com.hopcape.blog.models
 
 import com.hopcape.blog.utils.Resource
 
-enum class EditorKey(
+enum class EditorControl(
     val icon: String
 ) {
     Bold(Resource.Icon.bold),
