@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.hopcape.blog.components.AdminPageLayout
-import com.hopcape.blog.components.MessagePopup
+import com.hopcape.blog.components.LinkPopup
 import com.hopcape.blog.models.Category
 import com.hopcape.blog.models.ControlStyle
 import com.hopcape.blog.models.EditorControl
@@ -107,7 +107,9 @@ data class CreatePageUiState(
     var popular: Boolean = false,
     var sponsored: Boolean = false,
     var editorVisibility: Boolean = true,
-    var errorMessage : String? = null
+    var errorMessage : String? = null,
+    var linkPopup: Boolean = false,
+    var imagePopup: Boolean = false
 )
 
 @Page
@@ -315,6 +317,18 @@ fun CreateScreen() {
                         uiState = uiState.copy(
                             editorVisibility = !uiState.editorVisibility
                         )
+                    },
+                    onLinkClicked = {
+                        uiState = uiState.copy(
+                            linkPopup = true,
+                            imagePopup = false
+                        )
+                    },
+                    onImageClicked = {
+                        uiState = uiState.copy(
+                            imagePopup = true,
+                            linkPopup = false
+                        )
                     }
                 )
 
@@ -385,16 +399,46 @@ fun CreateScreen() {
             }
         }
     }
-    if (uiState.errorMessage != null){
-        MessagePopup(
-            message = uiState.errorMessage ?: "",
+    if (uiState.linkPopup){
+        LinkPopup(
+            editorControl = EditorControl.Link,
+            onAddClicked = { href, title ->
+                applyStyle(
+                    ControlStyle.Link(
+                        selectedText = getSelectedText(),
+                        href = href,
+                        title = title
+                    )
+                )
+            },
             onDialogDismissed = {
                 uiState = uiState.copy(
-                    errorMessage = null
+                    linkPopup = false
                 )
             }
         )
     }
+
+    if (uiState.imagePopup){
+        LinkPopup(
+            editorControl = EditorControl.Image,
+            onAddClicked = { imageUrl, description ->
+                applyStyle(
+                    ControlStyle.Image(
+                        selectedText = getSelectedText(),
+                        imageLink = imageUrl,
+                        desc = description
+                    )
+                )
+            },
+            onDialogDismissed = {
+                uiState = uiState.copy(
+                    imagePopup = false
+                )
+            }
+        )
+    }
+
 }
 
 @Composable
@@ -550,6 +594,8 @@ fun ThumbnailUploader(
 fun EditorControls(
     breakpoint: Breakpoint,
     editorVisibility: Boolean,
+    onLinkClicked: () -> Unit,
+    onImageClicked: () -> Unit,
     onEditorVisibilityChange: () -> Unit
 ) {
     Box(
@@ -572,7 +618,11 @@ fun EditorControls(
                     EditorControlView(
                         control = control,
                         onClick = {
-                            applyControlStyle(control)
+                            applyControlStyle(
+                                control = control,
+                                onLinkClicked = onLinkClicked,
+                                onImageClicked = onImageClicked
+                            )
                         }
                     )
                 }

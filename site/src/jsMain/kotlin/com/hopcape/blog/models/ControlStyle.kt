@@ -14,7 +14,7 @@ sealed class ControlStyle(val style: String){
         val href: String,
         val title: String
     ): ControlStyle(
-        style = "<a href=\"$href\" \"title=\"$title>$selectedText</a>"
+        style = "<a href=\"$href\" \"title=\"$title\">$selectedText</a>"
     )
 
     data class Title(val selectedText: String?): ControlStyle(

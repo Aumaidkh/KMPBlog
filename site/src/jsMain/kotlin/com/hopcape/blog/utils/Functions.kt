@@ -103,7 +103,11 @@ fun applyStyle(controlStyle: ControlStyle){
     }
 }
 
-fun applyControlStyle(control: EditorControl){
+fun applyControlStyle(
+    control: EditorControl,
+    onLinkClicked: () -> Unit,
+    onImageClicked: () -> Unit
+){
     when(control){
         EditorControl.Bold -> {
             applyStyle(
@@ -119,7 +123,9 @@ fun applyControlStyle(control: EditorControl){
                 )
             )
         }
-        EditorControl.Link -> {}
+        EditorControl.Link -> {
+            onLinkClicked()
+        }
         EditorControl.Title -> {
             applyStyle(
                 controlStyle = ControlStyle.Title(
@@ -142,6 +148,8 @@ fun applyControlStyle(control: EditorControl){
             )
         }
         EditorControl.Code -> {}
-        EditorControl.Image -> {}
+        EditorControl.Image -> {
+            onImageClicked()
+        }
     }
 }
