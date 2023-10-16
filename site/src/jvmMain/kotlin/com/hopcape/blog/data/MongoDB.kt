@@ -1,19 +1,20 @@
 package com.hopcape.blog.data
 
 import com.hopcape.blog.models.Post
+import com.hopcape.blog.models.PostWithoutDetails
 import com.hopcape.blog.models.User
 import com.hopcape.blog.utils.Constants.CONNECTION_STRING
 import com.hopcape.blog.utils.Constants.DATABASE_NAME
+import com.hopcape.blog.utils.Constants.POSTS_PER_PAGE
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.varabyte.kobweb.api.data.add
 import com.varabyte.kobweb.api.init.InitApi
 import com.varabyte.kobweb.api.init.InitApiContext
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.flow.toList
 import org.litote.kmongo.and
+import org.litote.kmongo.descending
 import org.litote.kmongo.eq
-import org.litote.kmongo.reactivestreams.KMongo
-import org.litote.kmongo.reactivestreams.getCollection
 
 
 @InitApi
@@ -64,6 +65,22 @@ class MongoDB(private val context: InitApiContext): MongoRepository {
         }catch (e: Exception){
             context.logger.error(e.message.toString())
             false
+        }
+    }
+
+    override suspend fun getMyPosts(skip: Int, author: String): List<PostWithoutDetails> {
+        return try {
+            postCollection
+                .withDocumentClass<PostWithoutDetails>()
+                .find(PostWithoutDetails::author eq author)
+                .sort(descending(PostWithoutDetails::date))
+                .skip(skip)
+                .limit(POSTS_PER_PAGE)
+                .toList()
+
+        }catch (e: Exception){
+            context.logger.error(e.message.toString())
+            emptyList()
         }
     }
 }

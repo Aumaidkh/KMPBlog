@@ -1,6 +1,7 @@
 package com.hopcape.blog.api
 
 import com.hopcape.blog.data.MongoDB
+import com.hopcape.blog.models.ApiListResponse
 import com.hopcape.blog.models.Post
 import com.varabyte.kobweb.api.Api
 import com.varabyte.kobweb.api.ApiContext
@@ -16,15 +17,36 @@ suspend fun addPost(context: ApiContext){
         val post = context.req.body?.decodeToString()?.let {
             Json.decodeFromString<Post>(it)
         }
-        val newPost = post?.copy(
-            id = ObjectIdGenerator.newObjectId<String>().id.toHexString()
-        )
+        post?._id = ObjectIdGenerator.newObjectId<String>().id.toHexString()
         context.res.setBodyText(
-            newPost?.let {
-                context.data.getValue<MongoDB>().addPost(it).toString()
+            post?.let { newPost ->
+                context.data.getValue<MongoDB>().addPost(newPost).toString()
             } ?: false.toString()
         )
-    }catch (e: Exception){
+    } catch (e: Exception) {
+        context.res.setBodyText(
+            text = Json.encodeToString(e.message)
+        )
+    }
+}
+
+@Api(routeOverride = "posts")
+suspend fun getPosts(context: ApiContext) {
+    try {
+        val skip = context.req.params["skip"]?.toInt() ?: 0
+        val author = context.req.params["author"] ?: ""
+
+        val posts = context
+            .data
+            .getValue<MongoDB>()
+            .getMyPosts(
+                skip = skip,
+                author = author
+            )
+        context.res.setBodyText(
+            Json.encodeToString(posts)
+        )
+    } catch (e: Exception) {
         context.res.setBodyText(
             text = Json.encodeToString(e.message)
         )

@@ -1,5 +1,6 @@
 package com.hopcape.blog.utils
 
+import com.hopcape.blog.models.ApiListResponse
 import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.RandomJoke
 import com.hopcape.blog.models.User
@@ -7,6 +8,7 @@ import com.varabyte.kobweb.browser.api
 import com.varabyte.kobweb.compose.http.http
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.w3c.dom.get
@@ -101,3 +103,24 @@ suspend fun addPost(post: Post): Boolean {
         false
     }
 }
+
+suspend fun fetchPosts(skip: Int): ApiListResponse {
+    return try {
+        val response = window.api.tryGet(
+            apiPath = "posts?skip=$skip&author=${localStorage["username"]}"
+        )?.decodeToString()
+        ApiListResponse.Success(
+            data = response.parseData()
+        )
+    }catch (e: Exception){
+        e.printStackTrace()
+        ApiListResponse
+            .Error(e.message.toString())
+    }
+}
+
+inline fun <reified T> String?.parseData(): T {
+    return Json.decodeFromString(this.toString())
+}
+
+
