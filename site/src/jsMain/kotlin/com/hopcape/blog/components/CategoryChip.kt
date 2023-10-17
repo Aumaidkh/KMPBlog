@@ -30,7 +30,7 @@ fun CategoryChip(category: Category) {
             .border(
                 width = 1.px,
                 style = LineStyle.Solid,
-                color = Theme.HalfBlack.rgb
+                color = Theme.Primary.rgb
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -38,7 +38,7 @@ fun CategoryChip(category: Category) {
             modifier = Modifier
                 .fontFamily(FONT_FAMILY)
                 .fontSize(12.px)
-                .color(Theme.HalfBlack.rgb),
+                .color(Theme.Primary.rgb),
             text = category.name
         )
     }

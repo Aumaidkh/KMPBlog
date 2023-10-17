@@ -1,6 +1,7 @@
 package com.hopcape.blog.pages.admin
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -8,6 +9,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.hopcape.blog.components.AdminPageLayout
 import com.hopcape.blog.components.LinkPopup
+import com.hopcape.blog.models.ApiResponse
 import com.hopcape.blog.models.Category
 import com.hopcape.blog.models.ControlStyle
 import com.hopcape.blog.models.EditorControl
@@ -17,11 +19,13 @@ import com.hopcape.blog.navigation.Screen
 import com.hopcape.blog.styles.EditorKeyStyle
 import com.hopcape.blog.styles.SwitchColorPalette
 import com.hopcape.blog.utils.Constants.FONT_FAMILY
+import com.hopcape.blog.utils.Constants.QUERY_POST_ID
 import com.hopcape.blog.utils.Constants.SIDE_PANEL_WIDTH
 import com.hopcape.blog.utils.Id
 import com.hopcape.blog.utils.addPost
 import com.hopcape.blog.utils.applyControlStyle
 import com.hopcape.blog.utils.applyStyle
+import com.hopcape.blog.utils.fetchPostBy
 import com.hopcape.blog.utils.getEditor
 import com.hopcape.blog.utils.getSelectedText
 import com.hopcape.blog.utils.isUserLoggedIn
@@ -129,6 +133,32 @@ fun CreateScreen() {
 
     var uiState by remember {
         mutableStateOf(CreatePageUiState())
+    }
+
+    val hasPostId = remember(key1 = context.route) {
+        context.route.params.containsKey(QUERY_POST_ID)
+    }
+
+
+    LaunchedEffect(hasPostId) {
+        if (hasPostId) {
+            val postId = context.route.params.getValue(QUERY_POST_ID)
+            val response = fetchPostBy(postId)
+            if (response is ApiResponse.Success) {
+                val post = response.data
+                uiState = uiState.copy(
+                    id = post._id,
+                    thumbnail = post.thumbnail,
+                    title = post.title,
+                    subtitle = post.subtitle,
+                    category = post.category,
+                    content = post.content,
+                    sponsored = post.sponsored,
+                    main = post.main,
+                    popular = post.popular
+                )
+            }
+        }
     }
 
     val scope = rememberCoroutineScope()

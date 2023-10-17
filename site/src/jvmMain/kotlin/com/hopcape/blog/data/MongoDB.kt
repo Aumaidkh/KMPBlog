@@ -114,4 +114,17 @@ class MongoDB(private val context: InitApiContext): MongoRepository {
             emptyList()
         }
     }
+
+    override suspend fun getPostBy(id: String): Post? {
+        return try {
+            postCollection
+                .find(Post::_id eq id)
+                .toList()
+                .firstOrNull()
+
+        }catch (e: Exception){
+            context.logger.error(e.message.toString())
+            null
+        }
+    }
 }

@@ -90,3 +90,25 @@ suspend fun searchPostsByTitle(context: ApiContext){
         )
     }
 }
+
+@Api(routeOverride = "get-post")
+suspend fun getPostById(context: ApiContext) {
+    val postId = context.req.params["postId"]
+    postId?.let {
+        try {
+            val post = context
+                .data
+                .getValue<MongoDB>()
+                .getPostBy(
+                    id = postId
+                )
+            context.res.setBodyText(
+                Json.encodeToString(post)
+            )
+        } catch (e: Exception) {
+            context.res.setBodyText(
+                text = Json.encodeToString(e.message)
+            )
+        }
+    }
+}

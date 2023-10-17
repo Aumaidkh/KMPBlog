@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.hopcape.blog.models.PostWithoutDetails
 import com.hopcape.blog.models.Theme
+import com.hopcape.blog.navigation.Screen
 import com.hopcape.blog.utils.Constants.FONT_FAMILY
 import com.hopcape.blog.utils.parseDateString
 import com.varabyte.kobweb.compose.css.CSSTransition
@@ -45,12 +46,12 @@ import com.varabyte.kobweb.compose.ui.modifiers.transition
 import com.varabyte.kobweb.compose.ui.modifiers.visibility
 import com.varabyte.kobweb.compose.ui.styleModifier
 import com.varabyte.kobweb.compose.ui.toAttrs
+import com.varabyte.kobweb.core.rememberPageContext
 import com.varabyte.kobweb.silk.components.graphics.Image
 import com.varabyte.kobweb.silk.components.layout.SimpleGrid
 import com.varabyte.kobweb.silk.components.layout.numColumns
 import com.varabyte.kobweb.silk.components.style.breakpoint.Breakpoint
 import com.varabyte.kobweb.silk.components.text.SpanText
-import com.varabyte.kobweb.silk.theme.breakpoint.rememberBreakpoint
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.ms
 import org.jetbrains.compose.web.css.percent
@@ -60,16 +61,17 @@ import org.jetbrains.compose.web.dom.CheckboxInput
 @Composable
 fun PostPreview(
     post: PostWithoutDetails,
-    selectable: Boolean = false,
+    selectableMode: Boolean = false,
     onSelect: (String) -> Unit,
     onDeselect: (String) -> Unit
 ) {
-    var checked by remember(selectable) { mutableStateOf(false) }
+    val context = rememberPageContext()
+    var checked by remember(selectableMode) { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxWidth(95.percent)
             .margin(bottom = 24.px)
-            .padding(all = if (selectable) 10.px else 0.px)
+            .padding(all = if (selectableMode) 10.px else 0.px)
             .borderRadius(r = 4.px)
             .transition(
                 CSSTransition(
@@ -78,18 +80,23 @@ fun PostPreview(
                 )
             )
             .border(
-                width = if (selectable) 4.px else 0.px,
-                style = if (selectable) LineStyle.Solid else LineStyle.None,
+                width = if (selectableMode) 4.px else 0.px,
+                style = if (selectableMode) LineStyle.Solid else LineStyle.None,
                 color = if (checked) Theme.Primary.rgb else Theme.Gray.rgb
             )
             .onClick {
-                if (selectable){
+                if (selectableMode){
                     checked = !checked
                     if (checked){
                         onSelect(post._id)
                     } else {
                         onDeselect(post._id)
                     }
+                } else {
+                    // When post is not selected only then
+                    context.router.navigateTo(
+                        pathQueryAndFragment = Screen.AdminCreate.passPostId(post._id)
+                    )
                 }
             }
             .cursor(Cursor.Pointer)
@@ -131,7 +138,7 @@ fun PostPreview(
             modifier = Modifier
                 .margin(bottom = 10.px)
                 .fontFamily(FONT_FAMILY)
-                .fontSize(16.px)
+                .fontSize(14.px)
                 .textOverflow(TextOverflow.Ellipsis)
                 .overflow(Overflow.Hidden)
                 .color(Colors.Black)
@@ -152,7 +159,7 @@ fun PostPreview(
             CategoryChip(
                 category = post.category
             )
-            if (selectable){
+            if (selectableMode){
                 CheckboxInput(
                     attrs = Modifier
                         .size(20.px)
@@ -170,7 +177,7 @@ fun Posts(
     posts: List<PostWithoutDetails>,
     showMoreVisibility: Boolean,
     onShowMore: () -> Unit,
-    selectable: Boolean = false,
+    selectableMode: Boolean = false,
     onSelect: (String) -> Unit,
     onDeselect: (String) -> Unit
 ) {
@@ -186,7 +193,7 @@ fun Posts(
             posts.forEach { post ->
                 PostPreview(
                     post = post,
-                    selectable = selectable,
+                    selectableMode = selectableMode,
                     onSelect = onSelect,
                     onDeselect = onDeselect
                 )

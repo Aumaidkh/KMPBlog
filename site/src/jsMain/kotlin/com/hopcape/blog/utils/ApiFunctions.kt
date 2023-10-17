@@ -1,9 +1,11 @@
 package com.hopcape.blog.utils
 
 import com.hopcape.blog.models.ApiListResponse
+import com.hopcape.blog.models.ApiResponse
 import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.RandomJoke
 import com.hopcape.blog.models.User
+import com.hopcape.blog.utils.Constants.QUERY_POST_ID
 import com.varabyte.kobweb.browser.api
 import com.varabyte.kobweb.compose.http.http
 import kotlinx.browser.localStorage
@@ -115,6 +117,21 @@ suspend fun fetchPosts(skip: Int): ApiListResponse {
     }catch (e: Exception){
         e.printStackTrace()
         ApiListResponse
+            .Error(e.message.toString())
+    }
+}
+
+suspend fun fetchPostBy(postId: String): ApiResponse {
+    return try {
+        val response = window.api.tryGet(
+            apiPath = "get-post?$QUERY_POST_ID=$postId"
+        )?.decodeToString()
+        ApiResponse.Success(
+            data = response.parseData()
+        )
+    }catch (e: Exception){
+        e.printStackTrace()
+        ApiResponse
             .Error(e.message.toString())
     }
 }

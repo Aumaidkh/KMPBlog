@@ -16,4 +16,6 @@ interface MongoRepository {
     suspend fun deleteSelectedPosts(postsIds: List<String>): Boolean
 
     suspend fun searchPostsByTitle(query: String,skip: Int): List<PostWithoutDetails>
+
+    suspend fun getPostBy(id: String): Post?
 }

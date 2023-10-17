@@ -13,6 +13,7 @@ import com.hopcape.blog.components.MessageBarPopup
 import com.hopcape.blog.components.Posts
 import com.hopcape.blog.components.SearchBar
 import com.hopcape.blog.models.ApiListResponse
+import com.hopcape.blog.models.Message
 import com.hopcape.blog.models.PostWithoutDetails
 import com.hopcape.blog.models.Theme
 import com.hopcape.blog.navigation.Screen
@@ -28,7 +29,9 @@ import com.hopcape.blog.utils.isUserLoggedIn
 import com.hopcape.blog.utils.noBorder
 import com.hopcape.blog.utils.parseSwitchText
 import com.hopcape.blog.utils.searchPostsByTitle
+import com.varabyte.kobweb.compose.css.CSSTransition
 import com.varabyte.kobweb.compose.css.FontWeight
+import com.varabyte.kobweb.compose.css.TransitionProperty
 import com.varabyte.kobweb.compose.css.Visibility
 import com.varabyte.kobweb.compose.foundation.layout.Arrangement
 import com.varabyte.kobweb.compose.foundation.layout.Box
@@ -49,6 +52,7 @@ import com.varabyte.kobweb.compose.ui.modifiers.height
 import com.varabyte.kobweb.compose.ui.modifiers.margin
 import com.varabyte.kobweb.compose.ui.modifiers.onClick
 import com.varabyte.kobweb.compose.ui.modifiers.padding
+import com.varabyte.kobweb.compose.ui.modifiers.transition
 import com.varabyte.kobweb.compose.ui.modifiers.visibility
 import com.varabyte.kobweb.compose.ui.toAttrs
 import com.varabyte.kobweb.core.Page
@@ -60,6 +64,7 @@ import com.varabyte.kobweb.silk.components.text.SpanText
 import com.varabyte.kobweb.silk.theme.breakpoint.rememberBreakpoint
 import kotlinx.browser.document
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.web.css.ms
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.Button
@@ -77,7 +82,7 @@ fun PostsPage() {
 fun PostsScreen() {
     val breakPoint = rememberBreakpoint()
     val context = rememberPageContext()
-    var selectable by remember {
+    var selectableMode by remember {
         mutableStateOf(false)
     }
     var postToSkip by remember { mutableStateOf(0) }
@@ -92,8 +97,8 @@ fun PostsScreen() {
         mutableStateListOf<PostWithoutDetails>()
     }
 
-    var errorMessage by remember {
-        mutableStateOf<String?>(null)
+    var message by remember {
+        mutableStateOf<Message?>(null)
     }
 
     var hasParams = remember(context.route) {
@@ -111,6 +116,7 @@ fun PostsScreen() {
     postToSkip = 0
     LaunchedEffect(key1 = context.route){
         if (hasParams){
+            (document.getElementById(Id.searchInput) as HTMLInputElement).value = query.replace("%20"," ")
             searchPostsByTitle(
                 query = query,
                 skip = postToSkip
@@ -162,7 +168,14 @@ fun PostsScreen() {
                     .margin(bottom = 24.px),
                 contentAlignment = Alignment.Center
             ) {
-                SearchBar {
+                SearchBar(
+                    modifier = Modifier
+                        .transition(CSSTransition(property = TransitionProperty.All,duration = 300.ms))
+                        .visibility(
+                            if (selectableMode) Visibility.Hidden else Visibility.Visible
+                        )
+
+                ) {
                     val query = (document.getElementById(Id.searchInput) as HTMLInputElement).value
                     context.router
                         .navigateTo(
@@ -184,11 +197,11 @@ fun PostsScreen() {
                     Switch(
                         modifier = Modifier
                             .margin(right = 8.px),
-                        checked = selectable,
+                        checked = selectableMode,
                         size = SwitchSize.LG,
                         onCheckedChange = {
-                            selectable = it
-                            if (!selectable){
+                            selectableMode = it
+                            if (!selectableMode){
                                 switchText = "Select"
                                 // We want to clear the selected posts list when the switched is turned off
                                 selectedPosts.clear()
@@ -200,7 +213,7 @@ fun PostsScreen() {
                     )
                     SpanText(
                         modifier = Modifier
-                            .color(if (selectable) Colors.Black else Theme.HalfBlack.rgb),
+                            .color(if (selectableMode) Colors.Black else Theme.HalfBlack.rgb),
                         text = switchText
                     )
                 }
@@ -222,16 +235,16 @@ fun PostsScreen() {
                            scope.launch {
                                deletePosts(postIds = selectedPosts).also {
                                    if (it){
-                                       selectable = false
+                                       selectableMode = false
                                        switchText = "Select"
                                        postToSkip -= selectedPosts.size
                                        posts.removeAll { post ->
                                            post._id in selectedPosts
                                        }
                                        selectedPosts.clear()
-                                       errorMessage = "Items Deleted"
+                                       message = Message.Success("Items Deleted")
                                    } else {
-                                       errorMessage = "Can't delete items"
+                                       message = Message.Error("Can't delete items")
                                    }
                                }
                            }
@@ -284,7 +297,7 @@ fun PostsScreen() {
                         }
                     }
                 },
-                selectable = selectable,
+                selectableMode = selectableMode,
                 onDeselect = {
                     selectedPosts.remove(it)
                 },
@@ -295,11 +308,11 @@ fun PostsScreen() {
         }
     }
 
-    if (errorMessage != null){
+    if (message != null){
         MessageBarPopup(
-            message = errorMessage!!,
+            message = message!!,
             onDialogDismissed = {
-                errorMessage = null
+                message = null
             }
         )
     }

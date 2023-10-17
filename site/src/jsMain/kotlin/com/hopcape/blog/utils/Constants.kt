@@ -1,13 +1,14 @@
 package com.hopcape.blog.utils
 
 object Constants {
-    const val FONT_FAMILY = "roboto"
+    const val FONT_FAMILY = "Poppins"
     const val SIDE_PANEL_WIDTH = 250
     const val SECTION_PAGE_WIDTH = 1920
     const val COLLAPSED_PANEL_HEIGHT = 100
     const val POST_PER_PAGE = 8
     const val HUMOR_API_BASE_URL = "https://api.humorapi.com/jokes/random?api-key=bb52c9feefa24cf890d8b7dc56f1f2f6&max-length=180"
 
+    const val QUERY_POST_ID = "postId"
     const val QUERY_PARAM = "query"
 }
 

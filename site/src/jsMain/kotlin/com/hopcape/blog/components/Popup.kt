@@ -2,7 +2,13 @@ package com.hopcape.blog.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import com.hopcape.blog.models.EditorControl
+import com.hopcape.blog.models.Message
 import com.hopcape.blog.models.Theme
 import com.hopcape.blog.utils.Constants.FONT_FAMILY
 import com.hopcape.blog.utils.Id
@@ -11,15 +17,20 @@ import com.varabyte.kobweb.compose.css.CSSTransition
 import com.varabyte.kobweb.compose.css.FontWeight
 import com.varabyte.kobweb.compose.css.TextAlign
 import com.varabyte.kobweb.compose.css.TransitionProperty
+import com.varabyte.kobweb.compose.foundation.layout.Arrangement
 import com.varabyte.kobweb.compose.foundation.layout.Box
 import com.varabyte.kobweb.compose.foundation.layout.Column
+import com.varabyte.kobweb.compose.foundation.layout.Row
 import com.varabyte.kobweb.compose.ui.Alignment
 import com.varabyte.kobweb.compose.ui.Modifier
 import com.varabyte.kobweb.compose.ui.graphics.Colors
 import com.varabyte.kobweb.compose.ui.modifiers.backgroundColor
+import com.varabyte.kobweb.compose.ui.modifiers.border
 import com.varabyte.kobweb.compose.ui.modifiers.borderRadius
 import com.varabyte.kobweb.compose.ui.modifiers.boxShadow
+import com.varabyte.kobweb.compose.ui.modifiers.classNames
 import com.varabyte.kobweb.compose.ui.modifiers.color
+import com.varabyte.kobweb.compose.ui.modifiers.fillMaxHeight
 import com.varabyte.kobweb.compose.ui.modifiers.fillMaxSize
 import com.varabyte.kobweb.compose.ui.modifiers.fillMaxWidth
 import com.varabyte.kobweb.compose.ui.modifiers.fontFamily
@@ -33,19 +44,27 @@ import com.varabyte.kobweb.compose.ui.modifiers.padding
 import com.varabyte.kobweb.compose.ui.modifiers.position
 import com.varabyte.kobweb.compose.ui.modifiers.textAlign
 import com.varabyte.kobweb.compose.ui.modifiers.transition
+import com.varabyte.kobweb.compose.ui.modifiers.translate
 import com.varabyte.kobweb.compose.ui.modifiers.width
 import com.varabyte.kobweb.compose.ui.modifiers.zIndex
+import com.varabyte.kobweb.compose.ui.styleModifier
 import com.varabyte.kobweb.compose.ui.toAttrs
 import com.varabyte.kobweb.silk.components.text.SpanText
 import kotlinx.browser.document
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.InputType
+import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.ms
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.vh
 import org.jetbrains.compose.web.dom.Button
+import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Input
+import org.jetbrains.compose.web.dom.Span
+import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.HTMLInputElement
 
 @Composable
@@ -180,9 +199,19 @@ fun LinkPopup(
 
 @Composable
 fun MessageBarPopup(
-    message: String,
+    message: Message,
     onDialogDismissed: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+    var percentage by remember {
+        mutableStateOf(0)
+    }
+    scope.launch {
+        (0 until 100) .forEach {
+            delay(5)
+            percentage = it
+        }
+    }
     LaunchedEffect(key1 = Unit){
         delay(2000)
         onDialogDismissed()
@@ -190,35 +219,97 @@ fun MessageBarPopup(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .backgroundColor(Theme.HalfBlack.rgb)
-            .transition(CSSTransition(
-                property = TransitionProperty.All,
-                duration = 300.ms
-            )),
+            .position(Position.Fixed)
+            .zIndex(19)
+            .backgroundColor(Theme.HalfBlack.rgb),
         contentAlignment = Alignment.TopEnd
     ) {
-        Box(
+        Row(
             modifier = Modifier
                 .margin(all = 16.px)
                 .borderRadius(r = 4.px)
-                .boxShadow(offsetX = 10.px, offsetY = 10.px, blurRadius = 10.px, spreadRadius = 10.px, color = Theme.HalfBlack.rgb)
                 .noBorder()
                 .fillMaxWidth(50.percent)
-                .padding(leftRight = 50.px, topBottom = 20.px)
+                .height(120.px)
+                .padding(leftRight = 20.px, topBottom = 20.px)
                 .backgroundColor(Colors.White)
+                .transition(CSSTransition(
+                    property = TransitionProperty.All,
+                    duration = 300.ms
+                ))
+                .translate(tx = 10.percent)
             ,
-            contentAlignment = Alignment.Center
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
         ) {
-            SpanText(
+            Box(
                 modifier = Modifier
-                    .fontFamily(FONT_FAMILY)
-                    .fontSize(20.px)
-                    .fontWeight(FontWeight.Medium)
-                    .color(Colors.Black),
-                text = message
+                    .margin(right = 24.px)
+                    .fillMaxHeight()
+                    .borderRadius(r = 1.px)
+                    .backgroundColor(Colors.WhiteSmoke)
+                    .width(10.px)
             )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(right = 24.px),
+                horizontalAlignment = Alignment.Start
+            ) {
+                SpanText(
+                    modifier = Modifier
+                        .fontFamily(FONT_FAMILY)
+                        .fontSize(24.px)
+                        .fontWeight(FontWeight.Medium)
+                        .color(message.getColor()),
+                    text = message::class.simpleName.toString()
+                )
+                SpanText(
+                    modifier = Modifier
+                        .margin(bottom = 24.px)
+                        .fontFamily(FONT_FAMILY)
+                        .fontSize(16.px)
+                        .fontWeight(FontWeight.Medium)
+                        .color(Colors.Black),
+                    text = message.data
+                )
+
+                Div(
+                    attrs = Modifier
+                        .fillMaxWidth()
+                        .height(10.px)
+                        .classNames("progress")
+                        .toAttrs{
+                            attr("role","progressbar")
+                            attr("aria-label","Example")
+                            attr("aria-valuenow","20")
+                            attr("aria-valuemin","0")
+                            attr("aria-valuemax","100")
+                        }
+                ) {
+                    Div(
+                        attrs = Modifier
+                            .classNames("progress-bar",message.getProgressBarTypeClass())
+                            .transition(
+                                CSSTransition(
+                                    property = TransitionProperty.All,
+                                    duration = 300.ms
+                                )
+                            )
+                            .styleModifier {
+                                property("width","$percentage%")
+                            }
+                            .toAttrs()
+                    )
+                }
+
+            }
+
         }
     }
 }
+
+
 
 
