@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.toList
 import org.litote.kmongo.and
 import org.litote.kmongo.descending
 import org.litote.kmongo.eq
+import org.litote.kmongo.`in`
+import org.litote.kmongo.regex
 
 
 @InitApi
@@ -73,6 +75,35 @@ class MongoDB(private val context: InitApiContext): MongoRepository {
             postCollection
                 .withDocumentClass<PostWithoutDetails>()
                 .find(PostWithoutDetails::author eq author)
+                .sort(descending(PostWithoutDetails::date))
+                .skip(skip)
+                .limit(POSTS_PER_PAGE)
+                .toList()
+
+        }catch (e: Exception){
+            context.logger.error(e.message.toString())
+            emptyList()
+        }
+    }
+
+    override suspend fun deleteSelectedPosts(postsIds: List<String>): Boolean {
+        return try {
+            postCollection
+                .deleteMany(Post::_id `in` postsIds)
+                .wasAcknowledged()
+
+        }catch (e: Exception){
+            context.logger.error(e.message.toString())
+            false
+        }
+    }
+
+    override suspend fun searchPostsByTitle(query: String, skip: Int): List<PostWithoutDetails> {
+        val regexQuery = query.toRegex(RegexOption.IGNORE_CASE)
+        return try {
+            postCollection
+                .withDocumentClass<PostWithoutDetails>()
+                .find(PostWithoutDetails::title regex regexQuery)
                 .sort(descending(PostWithoutDetails::date))
                 .skip(skip)
                 .limit(POSTS_PER_PAGE)

@@ -52,3 +52,41 @@ suspend fun getPosts(context: ApiContext) {
         )
     }
 }
+
+@Api(routeOverride = "delete-posts")
+suspend fun deletePosts(context: ApiContext){
+    try {
+        val postIds = context.req.body?.decodeToString()?.let {
+            Json.decodeFromString<List<String>>(it)
+        }
+        context.res.setBodyText(
+            postIds?.let { postIds ->
+                context.data.getValue<MongoDB>().deleteSelectedPosts(postIds).toString()
+            } ?: false.toString()
+        )
+    } catch (e: Exception) {
+        context.res.setBodyText(
+            text = Json.encodeToString(e.message)
+        )
+    }
+}
+
+@Api(routeOverride = "search-posts")
+suspend fun searchPostsByTitle(context: ApiContext){
+    try {
+        val query = context.req.params["query"] ?: ""
+        val skip = context.req.params["skip"]?.toInt() ?: 0
+        val result = context
+            .data
+            .getValue<MongoDB>()
+            .searchPostsByTitle(query=query,skip=skip)
+            .toList()
+        context.res.setBodyText(
+            Json.encodeToString(result)
+        )
+    } catch (e: Exception) {
+        context.res.setBodyText(
+            text = Json.encodeToString(e.message)
+        )
+    }
+}

@@ -119,6 +119,35 @@ suspend fun fetchPosts(skip: Int): ApiListResponse {
     }
 }
 
+suspend fun deletePosts(postIds: List<String>): Boolean {
+    return try {
+        window.api.tryPost(
+            apiPath = "delete-posts",
+            body = Json.encodeToString(postIds).encodeToByteArray()
+        )?.decodeToString().toBoolean()
+    }catch (e: Exception){
+        false
+    }
+}
+
+suspend fun searchPostsByTitle(
+    query: String,
+    skip: Int
+): ApiListResponse {
+    return try {
+        val response = window.api.tryGet(
+            apiPath = "search-posts?query=$query&skip=$skip"
+        )?.decodeToString()
+        ApiListResponse.Success(
+            data = response.parseData()
+        )
+    }catch (e: Exception){
+        e.printStackTrace()
+        ApiListResponse
+            .Error(e.message.toString())
+    }
+}
+
 inline fun <reified T> String?.parseData(): T {
     return Json.decodeFromString(this.toString())
 }
