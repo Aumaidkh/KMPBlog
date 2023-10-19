@@ -13,14 +13,14 @@ import com.hopcape.blog.components.MessageBarPopup
 import com.hopcape.blog.components.Posts
 import com.hopcape.blog.components.SearchBar
 import com.hopcape.blog.models.ApiListResponse
+import com.hopcape.blog.models.Constants.POST_PER_PAGE
+import com.hopcape.blog.models.Constants.QUERY_PARAM
 import com.hopcape.blog.models.Message
 import com.hopcape.blog.models.PostWithoutDetails
 import com.hopcape.blog.models.Theme
 import com.hopcape.blog.navigation.Screen
 import com.hopcape.blog.styles.SwitchColorPalette
 import com.hopcape.blog.utils.Constants.FONT_FAMILY
-import com.hopcape.blog.utils.Constants.POST_PER_PAGE
-import com.hopcape.blog.utils.Constants.QUERY_PARAM
 import com.hopcape.blog.utils.Constants.SIDE_PANEL_WIDTH
 import com.hopcape.blog.utils.Id
 import com.hopcape.blog.utils.deletePosts
@@ -104,12 +104,8 @@ fun PostsScreen() {
     var hasParams = remember(context.route) {
         context.route.params.containsKey(QUERY_PARAM)
     }
-    var query = remember(context.route) {
-        try {
-            context.route.params.getValue(QUERY_PARAM)
-        } catch (e: Exception){
-            ""
-        }
+    val query = remember(context.route) {
+        context.route.params[QUERY_PARAM] ?: ""
     }
 
     val scope = rememberCoroutineScope()

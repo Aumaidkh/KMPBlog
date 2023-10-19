@@ -2,15 +2,18 @@ package com.hopcape.blog.utils
 
 import com.hopcape.blog.models.ApiListResponse
 import com.hopcape.blog.models.ApiResponse
+import com.hopcape.blog.models.Constants.AUTHOR_PARAM
+import com.hopcape.blog.models.Constants.QUERY_PARAM
+import com.hopcape.blog.models.Constants.QUERY_POST_ID
+import com.hopcape.blog.models.Constants.SKIP_PARAM
 import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.RandomJoke
 import com.hopcape.blog.models.User
-import com.hopcape.blog.utils.Constants.QUERY_POST_ID
+import com.hopcape.blog.utils.Constants.HUMOR_API_BASE_URL
 import com.varabyte.kobweb.browser.api
 import com.varabyte.kobweb.compose.http.http
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.w3c.dom.get
@@ -22,8 +25,8 @@ suspend fun checkUserExistence(user: User): User?{
         val result = window.api.tryPost(
             apiPath = "usercheck",
             body = Json.encodeToString(user).encodeToByteArray()
-        )
-        result?.decodeToString()?.let { Json.decodeFromString(it) }
+        )?.decodeToString()
+        result?.parseData<User>()
     } catch (e: Exception){
         println(e.message)
         null
@@ -35,8 +38,8 @@ suspend fun checkUserId(userId: String): Boolean {
         val result = window.api.tryPost(
             apiPath = "checkuserid",
             body = Json.encodeToString(userId).encodeToByteArray()
-        )
-        result?.decodeToString()?.let { Json.decodeFromString(it) } ?: false
+        )?.decodeToString()
+        result.parseData()
     } catch (e: Exception){
         println(e.message)
         false
@@ -48,7 +51,7 @@ suspend fun getRandomJoke(): RandomJoke?{
         val result = window.api.tryGet(
             apiPath = "random-joke"
         )
-        result?.decodeToString()?.let { Json.decodeFromString(it) }
+        result?.decodeToString()?.parseData<RandomJoke>()
     }catch (e: Exception){
         null
     }
@@ -63,7 +66,7 @@ suspend fun fetchRandomJoke(): RandomJoke?{
             try {
                 val result = window
                     .http
-                    .get(Constants.HUMOR_API_BASE_URL)
+                    .get(HUMOR_API_BASE_URL)
                     .decodeToString()
                 localStorage["date"] = Date.now().toString()
                 localStorage["joke"] = result
@@ -84,7 +87,7 @@ suspend fun fetchRandomJoke(): RandomJoke?{
         try {
             val result = window
                 .http
-                .get(Constants.HUMOR_API_BASE_URL)
+                .get(HUMOR_API_BASE_URL)
                 .decodeToString()
             localStorage["date"] = Date.now().toString()
             localStorage["joke"] = result
@@ -102,6 +105,19 @@ suspend fun addPost(post: Post): Boolean {
             body = Json.encodeToString(post).encodeToByteArray()
         )?.decodeToString().toBoolean()
     }catch (e: Exception){
+        println("Exception: ${e.message}")
+        false
+    }
+}
+
+suspend fun updatePost(post: Post): Boolean {
+    return try {
+        window.api.tryPost(
+            apiPath = "update-post",
+            body = Json.encodeToString(post).encodeToByteArray()
+        )?.decodeToString().toBoolean()
+    }catch (e: Exception){
+        println("Exception: ${e.message}")
         false
     }
 }
@@ -109,7 +125,7 @@ suspend fun addPost(post: Post): Boolean {
 suspend fun fetchPosts(skip: Int): ApiListResponse {
     return try {
         val response = window.api.tryGet(
-            apiPath = "posts?skip=$skip&author=${localStorage["username"]}"
+            apiPath = "posts?$SKIP_PARAM=$skip&$AUTHOR_PARAM=${localStorage["username"]}"
         )?.decodeToString()
         ApiListResponse.Success(
             data = response.parseData()
@@ -153,7 +169,7 @@ suspend fun searchPostsByTitle(
 ): ApiListResponse {
     return try {
         val response = window.api.tryGet(
-            apiPath = "search-posts?query=$query&skip=$skip"
+            apiPath = "search-posts?$QUERY_PARAM=$query&$SKIP_PARAM=$skip"
         )?.decodeToString()
         ApiListResponse.Success(
             data = response.parseData()

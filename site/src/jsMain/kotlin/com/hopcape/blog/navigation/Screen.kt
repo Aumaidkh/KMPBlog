@@ -1,7 +1,8 @@
 package com.hopcape.blog.navigation
 
-import com.hopcape.blog.utils.Constants.QUERY_PARAM
-import com.hopcape.blog.utils.Constants.QUERY_POST_ID
+import com.hopcape.blog.models.Constants.POST_UPDATED_PARAM
+import com.hopcape.blog.models.Constants.QUERY_PARAM
+import com.hopcape.blog.models.Constants.QUERY_POST_ID
 
 sealed class Screen(val route: String){
     data object AdminHome: Screen(route = "/admin/")
@@ -16,5 +17,7 @@ sealed class Screen(val route: String){
             return "/admin/posts?$QUERY_PARAM=$query"
         }
     }
-    data object AdminSuccess: Screen(route = "/admin/success")
+    data object AdminSuccess: Screen(route = "/admin/success"){
+        fun postUpdated() = "/admin/success?$POST_UPDATED_PARAM=true"
+    }
 }

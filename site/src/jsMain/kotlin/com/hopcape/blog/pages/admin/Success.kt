@@ -2,13 +2,17 @@ package com.hopcape.blog.pages.admin
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.hopcape.blog.models.Constants.POST_UPDATED_PARAM
 import com.hopcape.blog.models.Theme
 import com.hopcape.blog.navigation.Screen
 import com.hopcape.blog.utils.Constants.FONT_FAMILY
 import com.hopcape.blog.utils.Resource
 import com.varabyte.kobweb.compose.css.FontWeight
 import com.varabyte.kobweb.compose.foundation.layout.Arrangement
-import com.varabyte.kobweb.compose.foundation.layout.Box
 import com.varabyte.kobweb.compose.foundation.layout.Column
 import com.varabyte.kobweb.compose.ui.Alignment
 import com.varabyte.kobweb.compose.ui.Modifier
@@ -31,7 +35,24 @@ import org.jetbrains.compose.web.css.px
 @Page
 fun SuccessPage() {
     val context = rememberPageContext()
+    val hasParams by remember(context.route) {
+        mutableStateOf(context.route.params.containsKey(POST_UPDATED_PARAM))
+    }
+
+    var message by remember {
+        mutableStateOf("Post Created Successfully")
+    }
+
     LaunchedEffect(key1 = Unit){
+        // Resolve message
+        if (hasParams){
+            context.route.params[POST_UPDATED_PARAM]?.toBoolean()?.let {
+                if (it){
+                   message = "Post Updated Successfully"
+                }
+            }
+        }
+
         delay(5000)
         context.router.navigateTo(
             pathQueryAndFragment = Screen.AdminCreate.route
@@ -58,7 +79,7 @@ fun SuccessPage() {
                 .fontSize(24.px)
                 .fontWeight(FontWeight.Medium)
                 .color(Colors.Black),
-            text = "Post Created Successfully"
+            text = message
         )
         // Text
         SpanText(

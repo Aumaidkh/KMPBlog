@@ -18,4 +18,6 @@ interface MongoRepository {
     suspend fun searchPostsByTitle(query: String,skip: Int): List<PostWithoutDetails>
 
     suspend fun getPostBy(id: String): Post?
+
+    suspend fun updatePost(post: Post): Boolean
 }

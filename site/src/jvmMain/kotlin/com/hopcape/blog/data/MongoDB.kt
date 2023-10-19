@@ -1,11 +1,11 @@
 package com.hopcape.blog.data
 
+import com.hopcape.blog.models.Constants.POST_PER_PAGE
 import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.PostWithoutDetails
 import com.hopcape.blog.models.User
 import com.hopcape.blog.utils.Constants.CONNECTION_STRING
 import com.hopcape.blog.utils.Constants.DATABASE_NAME
-import com.hopcape.blog.utils.Constants.POSTS_PER_PAGE
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.varabyte.kobweb.api.data.add
 import com.varabyte.kobweb.api.init.InitApi
@@ -17,6 +17,7 @@ import org.litote.kmongo.descending
 import org.litote.kmongo.eq
 import org.litote.kmongo.`in`
 import org.litote.kmongo.regex
+import org.litote.kmongo.setValue
 
 
 @InitApi
@@ -77,7 +78,7 @@ class MongoDB(private val context: InitApiContext): MongoRepository {
                 .find(PostWithoutDetails::author eq author)
                 .sort(descending(PostWithoutDetails::date))
                 .skip(skip)
-                .limit(POSTS_PER_PAGE)
+                .limit(POST_PER_PAGE)
                 .toList()
 
         }catch (e: Exception){
@@ -106,7 +107,7 @@ class MongoDB(private val context: InitApiContext): MongoRepository {
                 .find(PostWithoutDetails::title regex regexQuery)
                 .sort(descending(PostWithoutDetails::date))
                 .skip(skip)
-                .limit(POSTS_PER_PAGE)
+                .limit(POST_PER_PAGE)
                 .toList()
 
         }catch (e: Exception){
@@ -125,6 +126,27 @@ class MongoDB(private val context: InitApiContext): MongoRepository {
         }catch (e: Exception){
             context.logger.error(e.message.toString())
             null
+        }
+    }
+
+    override suspend fun updatePost(post: Post): Boolean {
+        return try {
+            postCollection.updateOne(
+                filter = Post::_id eq post._id,
+                update = mutableListOf(
+                    setValue(Post::title, post.title),
+                    setValue(Post::subtitle, post.subtitle),
+                    setValue(Post::thumbnail, post.thumbnail),
+                    setValue(Post::category, post.category),
+                    setValue(Post::popular, post.popular),
+                    setValue(Post::sponsored, post.sponsored),
+                    setValue(Post::main, post.main),
+                    setValue(Post::content, post.content),
+                )
+            ).wasAcknowledged()
+        }catch (e: Exception){
+            context.logger.error(e.message.toString())
+            false
         }
     }
 }

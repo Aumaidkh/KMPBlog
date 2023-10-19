@@ -9,6 +9,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.hopcape.blog.components.AdminPageLayout
 import com.hopcape.blog.components.LinkPopup
+import com.hopcape.blog.components.MessageBarPopup
 import com.hopcape.blog.models.ApiResponse
 import com.hopcape.blog.models.Category
 import com.hopcape.blog.models.ControlStyle
@@ -18,8 +19,9 @@ import com.hopcape.blog.models.Theme
 import com.hopcape.blog.navigation.Screen
 import com.hopcape.blog.styles.EditorKeyStyle
 import com.hopcape.blog.styles.SwitchColorPalette
+import com.hopcape.blog.models.Constants.QUERY_POST_ID
+import com.hopcape.blog.models.Message
 import com.hopcape.blog.utils.Constants.FONT_FAMILY
-import com.hopcape.blog.utils.Constants.QUERY_POST_ID
 import com.hopcape.blog.utils.Constants.SIDE_PANEL_WIDTH
 import com.hopcape.blog.utils.Id
 import com.hopcape.blog.utils.addPost
@@ -30,6 +32,7 @@ import com.hopcape.blog.utils.getEditor
 import com.hopcape.blog.utils.getSelectedText
 import com.hopcape.blog.utils.isUserLoggedIn
 import com.hopcape.blog.utils.noBorder
+import com.hopcape.blog.utils.updatePost
 import com.varabyte.kobweb.compose.css.Cursor
 import com.varabyte.kobweb.compose.css.FontWeight
 import com.varabyte.kobweb.compose.css.Overflow
@@ -99,6 +102,7 @@ import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.HTMLTextAreaElement
 import org.w3c.dom.get
 import kotlin.js.Date
+import kotlin.math.ceil
 
 
 data class CreatePageUiState(
@@ -139,13 +143,26 @@ fun CreateScreen() {
         context.route.params.containsKey(QUERY_POST_ID)
     }
 
+    var message by remember {
+        mutableStateOf<Message?>(null)
+    }
+
+    fun createDestinationRoute(): String {
+        return if (hasPostId){
+           Screen.AdminSuccess.postUpdated()
+        } else {
+            Screen.AdminSuccess.route
+        }
+    }
+
 
     LaunchedEffect(hasPostId) {
         if (hasPostId) {
-            val postId = context.route.params.getValue(QUERY_POST_ID)
+            val postId = context.route.params[QUERY_POST_ID] ?: ""
             val response = fetchPostBy(postId)
             if (response is ApiResponse.Success) {
                 val post = response.data
+
                 uiState = uiState.copy(
                     id = post._id,
                     thumbnail = post.thumbnail,
@@ -157,7 +174,13 @@ fun CreateScreen() {
                     main = post.main,
                     popular = post.popular
                 )
+                (document.getElementById(Id.editor) as HTMLTextAreaElement)
+                    .value = uiState.content
             }
+        } else {
+            (document.getElementById(Id.editor) as HTMLTextAreaElement)
+                .value = ""
+            uiState = CreatePageUiState()
         }
     }
 
@@ -277,6 +300,7 @@ fun CreateScreen() {
                         .fontSize(16.px)
                         .toAttrs() {
                             attr("placeholder", "Title")
+                            attr("value", uiState.title)
                         },
                     type = InputType.Text
                 )
@@ -294,6 +318,7 @@ fun CreateScreen() {
                         .fontSize(16.px)
                         .toAttrs() {
                             attr("placeholder", "Subtitle")
+                            attr("value", uiState.subtitle)
                         },
                     type = InputType.Text
                 )
@@ -369,12 +394,13 @@ fun CreateScreen() {
                 )
 
                 CreateButton(
+                    text = if (hasPostId) "Update" else "Create",
                     onClick = {
 
                         uiState =
                             uiState.copy(title = (document.getElementById(Id.titleInput) as HTMLInputElement).value)
                         uiState =
-                            uiState.copy(thumbnail = (document.getElementById(Id.thumbnailInput) as HTMLInputElement).value)
+                            uiState.copy(subtitle = (document.getElementById(Id.subtitleInput) as HTMLInputElement).value)
                         uiState =
                             uiState.copy(content = (document.getElementById(Id.editor) as HTMLTextAreaElement).value)
 
@@ -383,7 +409,7 @@ fun CreateScreen() {
                          * update the thumbnail from the input field*/
                         if(!uiState.thumbnailInputDisabled){
                             uiState =
-                                uiState.copy(subtitle = (document.getElementById(Id.thumbnailInput) as HTMLInputElement).value)
+                                uiState.copy(thumbnail = (document.getElementById(Id.thumbnailInput) as HTMLInputElement).value)
 
                         }
 
@@ -394,28 +420,31 @@ fun CreateScreen() {
                             uiState.content.isNotEmpty()) {
 
                             scope.launch {
-                                val result = addPost(
-                                    post = Post(
-                                        title = uiState.title,
-                                        author = localStorage["username"].toString(),
-                                        subtitle = uiState.subtitle,
-                                        date = Date.now().toLong(),
-                                        thumbnail = uiState.thumbnail,
-                                        content = uiState.content,
-                                        category = uiState.category,
-                                        popular = uiState.popular,
-                                        main = uiState.main,
-                                        sponsored = uiState.sponsored
-                                    )
+                                val post = Post(
+                                    _id = uiState.id,
+                                    title = uiState.title,
+                                    author = localStorage["username"].toString(),
+                                    subtitle = uiState.subtitle,
+                                    date = Date.now().toLong(),
+                                    thumbnail = uiState.thumbnail,
+                                    content = uiState.content,
+                                    category = uiState.category,
+                                    popular = uiState.popular,
+                                    main = uiState.main,
+                                    sponsored = uiState.sponsored
+                                )
+                                val result = createOrUpdatePost(
+                                    create = !hasPostId,
+                                    post = post
                                 )
                                 if (result){
                                     context
                                         .router
                                         .navigateTo(
-                                            pathQueryAndFragment = Screen.AdminSuccess.route
+                                            pathQueryAndFragment = createDestinationRoute()
                                         )
                                 } else {
-                                    println("Error Adding Post")
+                                    message = Message.Error("Error adding post.")
                                 }
                             }
 
@@ -471,10 +500,20 @@ fun CreateScreen() {
         )
     }
 
+    if (message != null){
+        MessageBarPopup(
+            message = message!!,
+            onDialogDismissed = {
+                message = null
+            }
+        )
+    }
+
 }
 
 @Composable
 private fun CreateButton(
+    text: String = "Create",
     onClick: () -> Unit
 ) {
     Button(
@@ -492,7 +531,7 @@ private fun CreateButton(
             }
             .toAttrs()
     ) {
-        SpanText("Create")
+        SpanText(text)
     }
 }
 
@@ -776,5 +815,16 @@ fun Editor(
         ) {
 
         }
+    }
+
+}
+
+
+
+private suspend fun createOrUpdatePost(create: Boolean, post: Post): Boolean {
+    return if (create){
+        addPost(post)
+    } else {
+        updatePost(post)
     }
 }
