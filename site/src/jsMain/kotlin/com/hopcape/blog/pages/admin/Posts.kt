@@ -165,11 +165,13 @@ fun PostsScreen() {
                 contentAlignment = Alignment.Center
             ) {
                 SearchBar(
+                    breakpoint = breakPoint,
                     modifier = Modifier
                         .transition(CSSTransition(property = TransitionProperty.All,duration = 300.ms))
                         .visibility(
                             if (selectableMode) Visibility.Hidden else Visibility.Visible
-                        )
+                        ),
+                    onSearchIconClicked = {}
 
                 ) {
                     val query = (document.getElementById(Id.searchInput) as HTMLInputElement).value

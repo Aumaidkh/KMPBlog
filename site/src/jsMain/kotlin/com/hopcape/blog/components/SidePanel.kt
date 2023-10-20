@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.hopcape.blog.models.Theme
 import com.hopcape.blog.navigation.Screen
@@ -60,6 +61,7 @@ import com.varabyte.kobweb.silk.components.style.toModifier
 import com.varabyte.kobweb.silk.components.text.SpanText
 import com.varabyte.kobweb.silk.theme.breakpoint.rememberBreakpoint
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.ms
 import org.jetbrains.compose.web.css.percent
@@ -115,7 +117,7 @@ private fun SidePanelInternal() {
 }
 
 @Composable
-private fun NavigationItems() {
+fun NavigationItems() {
     val context = rememberPageContext()
     NavigationItem(
         modifier = Modifier.margin(bottom = 24.px),
@@ -256,21 +258,25 @@ private fun CollapsedSidePanel(
 
 @Composable
 fun OverflowSidePanel(
-    onMenuClose: () -> Unit = {}
+    onMenuClose: () -> Unit = {},
+    content: @Composable () -> Unit
 ) {
     val breakpoint = rememberBreakpoint()
 
     var translateX by remember { mutableStateOf((-100).percent) }
     var opacity by remember { mutableStateOf(0.percent) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = breakpoint){
         translateX = 0.percent
         opacity = 100.percent
-        if (breakpoint > Breakpoint.MD){
-            translateX = (-100).percent
-            opacity = 0.percent
-            delay(5000)
-            onMenuClose()
+        if (breakpoint > Breakpoint.MD) {
+            scope.launch {
+                translateX = (-100).percent
+                opacity = 0.percent
+                delay(500)
+                onMenuClose()
+            }
         }
     }
     Box(
@@ -312,12 +318,12 @@ fun OverflowSidePanel(
                 Image(
                     modifier = Modifier
                         .height(100.px)
-                        .width(150.px),
+                        .width(130.px),
                     src = Resource.Image.logo,
                     desc = "Logo Image"
                 )
             }
-            NavigationItems()
+            content()
         }
     }
 }

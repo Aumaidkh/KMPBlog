@@ -1,5 +1,6 @@
 package com.hopcape.blog.data
 
+import com.hopcape.blog.models.Constants.MAIN_POST_LIMIT
 import com.hopcape.blog.models.Constants.POST_PER_PAGE
 import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.PostWithoutDetails
@@ -147,6 +148,21 @@ class MongoDB(private val context: InitApiContext): MongoRepository {
         }catch (e: Exception){
             context.logger.error(e.message.toString())
             false
+        }
+    }
+
+    override suspend fun readMainPosts(): List<PostWithoutDetails> {
+        return try {
+            postCollection
+                .withDocumentClass<PostWithoutDetails>()
+                .find(PostWithoutDetails::main eq true)
+                .sort(descending(PostWithoutDetails::date))
+                .limit(MAIN_POST_LIMIT)
+                .toList()
+
+        }catch (e: Exception){
+            context.logger.error(e.message.toString())
+            emptyList()
         }
     }
 }

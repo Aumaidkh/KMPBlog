@@ -16,6 +16,10 @@ enum class Theme(
         hex = "#001019",
         rgb = rgb(r = 0, g = 16, b = 25)
     ),
+    Tertiary(
+        hex = "#C2F4EF",
+        rgb = rgba(r=194,g=244,b=239, a = 0.1)
+    ),
     LightGray(
         hex = "#FAFAFA",
         rgb = rgb(r=250,g=250,b=250)

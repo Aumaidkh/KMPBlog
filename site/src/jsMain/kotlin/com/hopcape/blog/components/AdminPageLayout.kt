@@ -40,6 +40,9 @@ fun AdminPageLayout(
                 OverflowSidePanel(
                     onMenuClose = {
                         overFlowMenuOpened = false
+                    },
+                    content = {
+                        NavigationItems()
                     }
                 )
             }

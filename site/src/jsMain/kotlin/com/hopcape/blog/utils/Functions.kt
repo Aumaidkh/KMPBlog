@@ -15,6 +15,7 @@ import com.varabyte.kobweb.compose.ui.graphics.Colors
 import com.varabyte.kobweb.compose.ui.modifiers.border
 import com.varabyte.kobweb.compose.ui.modifiers.outline
 import com.varabyte.kobweb.core.rememberPageContext
+import com.varabyte.kobweb.silk.components.style.breakpoint.Breakpoint
 import com.varabyte.kobweb.silk.components.text.SpanText
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
@@ -166,3 +167,8 @@ fun Long.parseDateString() = Date(this).toLocaleDateString()
 fun parseSwitchText(posts: List<String>): String {
     return if (posts.isEmpty()) "Select" else if (posts.size == 1) "1 Post Selected" else "${posts.size} Posts Selected"
 }
+
+fun Breakpoint.isLaptop() = this > Breakpoint.MD
+fun Breakpoint.isMobile() = this < Breakpoint.SM
+
+fun Breakpoint.isLargeDevice() = this >= Breakpoint.LG

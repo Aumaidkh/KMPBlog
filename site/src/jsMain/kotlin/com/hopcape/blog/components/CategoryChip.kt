@@ -28,7 +28,7 @@ fun CategoryChip(category: Category) {
             .border(
                 width = 1.px,
                 style = LineStyle.Solid,
-                color = Theme.Primary.rgb
+                color = Theme.values().find { it.hex == category.color }?.rgb
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -36,7 +36,7 @@ fun CategoryChip(category: Category) {
             modifier = Modifier
                 .fontFamily(FONT_FAMILY)
                 .fontSize(12.px)
-                .color(Theme.Primary.rgb),
+                .color(Theme.values().find { it.hex == category.color }?.rgb ?: Theme.HalfBlack.rgb),
             text = category.name
         )
     }

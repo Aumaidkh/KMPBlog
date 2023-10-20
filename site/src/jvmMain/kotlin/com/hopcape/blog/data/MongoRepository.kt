@@ -20,4 +20,6 @@ interface MongoRepository {
     suspend fun getPostBy(id: String): Post?
 
     suspend fun updatePost(post: Post): Boolean
+
+    suspend fun readMainPosts(): List<PostWithoutDetails>
 }

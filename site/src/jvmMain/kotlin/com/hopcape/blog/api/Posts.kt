@@ -57,6 +57,19 @@ suspend fun getPosts(context: ApiContext) {
     }
 }
 
+@Api(routeOverride = "main-posts")
+suspend fun getMainPosts(context: ApiContext) {
+    try {
+        val posts = context
+            .data
+            .getValue<MongoDB>()
+            .readMainPosts()
+        context.res.setBody(posts)
+    } catch (e: Exception) {
+        context.res.setException(e)
+    }
+}
+
 @Api(routeOverride = "delete-posts")
 suspend fun deletePosts(context: ApiContext){
     try {
