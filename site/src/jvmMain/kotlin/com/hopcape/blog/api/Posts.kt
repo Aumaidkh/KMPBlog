@@ -97,6 +97,20 @@ suspend fun getSponsoredPosts(context: ApiContext) {
     }
 }
 
+@Api(routeOverride = "popular-posts")
+suspend fun getPopularPosts(context: ApiContext) {
+    try {
+        val skip = context.req.params["skip"]?.toInt() ?: 0
+        val posts = context
+            .data
+            .getValue<MongoDB>()
+            .readPopularPosts(skip)
+        context.res.setBody(posts)
+    } catch (e: Exception) {
+        context.res.setException(e)
+    }
+}
+
 @Api(routeOverride = "delete-posts")
 suspend fun deletePosts(context: ApiContext){
     try {

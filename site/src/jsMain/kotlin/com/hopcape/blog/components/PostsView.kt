@@ -53,7 +53,7 @@ fun PostsView(
                     .color(Colors.Black)
                     .fontFamily(Constants.FONT_FAMILY)
                     .fontWeight(FontWeight.Medium)
-                    .fontSize(30.px),
+                    .fontSize(24.px),
                 text = title
             )
         }

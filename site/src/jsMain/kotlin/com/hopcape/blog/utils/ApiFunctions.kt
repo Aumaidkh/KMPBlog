@@ -182,6 +182,21 @@ suspend fun fetchSponsoredPosts(): ApiListResponse {
     }
 }
 
+suspend fun fetchPopularPosts(skip: Int = 0): ApiListResponse {
+    return try {
+        val response = window.api.tryGet(
+            apiPath = "popular-posts?skip=$skip"
+        )?.decodeToString()
+        ApiListResponse.Success(
+            data = response.parseData()
+        )
+    }catch (e: Exception){
+        e.printStackTrace()
+        ApiListResponse
+            .Error(e.message.toString())
+    }
+}
+
 suspend fun fetchPostBy(postId: String): ApiResponse {
     return try {
         val response = window.api.tryGet(

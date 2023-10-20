@@ -12,6 +12,7 @@ import com.hopcape.blog.components.CategoryNavigationItems
 import com.hopcape.blog.components.OverflowSidePanel
 import com.hopcape.blog.models.ApiListResponse
 import com.hopcape.blog.models.Constants.LATEST_POST_LIMIT
+import com.hopcape.blog.models.Constants.POPULAR_POST_LIMIT
 import com.hopcape.blog.models.PostWithoutDetails
 import com.hopcape.blog.sections.HeaderSection
 import com.hopcape.blog.sections.MainSection
@@ -19,6 +20,7 @@ import com.hopcape.blog.sections.PostsSection
 import com.hopcape.blog.sections.SponsoredSection
 import com.hopcape.blog.utils.fetchLatestPosts
 import com.hopcape.blog.utils.fetchMainPosts
+import com.hopcape.blog.utils.fetchPopularPosts
 import com.hopcape.blog.utils.fetchSponsoredPosts
 import com.varabyte.kobweb.compose.foundation.layout.Arrangement
 import com.varabyte.kobweb.compose.foundation.layout.Column
@@ -44,13 +46,13 @@ fun HomePage() {
         mutableStateListOf<PostWithoutDetails>()
     }
 
-    var latestPostsToSkip by remember {
-        mutableStateOf(0)
-    }
+    val popularPosts = remember { mutableStateListOf<PostWithoutDetails>() }
 
-    var showMoreButton by remember {
-        mutableStateOf(false)
-    }
+    var latestPostsToSkip by remember { mutableStateOf(0) }
+    var popularPostsToSkip by remember { mutableStateOf(0) }
+
+    var showMoreButton by remember { mutableStateOf(false) }
+    var showMoreButtonInPopular by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = Unit){
         fetchMainPosts().also {response ->
@@ -72,6 +74,18 @@ fun HomePage() {
                 is ApiListResponse.Error -> {}
                 is ApiListResponse.Idle -> {}
                 is ApiListResponse.Success -> sponsoredPosts.addAll(response.data)
+            }
+        }
+
+        fetchPopularPosts().also { response ->
+            when(response){
+                is ApiListResponse.Error -> {}
+                is ApiListResponse.Idle -> {}
+                is ApiListResponse.Success -> {
+                    popularPosts.addAll(response.data)
+                    popularPostsToSkip += POPULAR_POST_LIMIT
+                    showMoreButtonInPopular = response.data.size >= POPULAR_POST_LIMIT
+                }
             }
         }
     }
@@ -138,6 +152,30 @@ fun HomePage() {
             breakpoint = breakpoint,
             posts = sponsoredPosts,
             onClick = {}
+        )
+
+        PostsSection(
+            posts = popularPosts,
+            showMoreVisibility = showMoreButtonInPopular,
+            onClick = {},
+            onShowMore = {
+                scope.launch {
+                    fetchPopularPosts(popularPostsToSkip).also { response ->
+                        when(response){
+                            is ApiListResponse.Error -> {}
+                            is ApiListResponse.Idle -> {}
+                            is ApiListResponse.Success -> {
+                                popularPosts.addAll(response.data)
+                                popularPostsToSkip += POPULAR_POST_LIMIT
+                                showMoreButtonInPopular = response.data.size >= POPULAR_POST_LIMIT
+                            }
+                        }
+                    }
+                }
+            },
+            title = "Popular Posts",
+            breakpoint = breakpoint,
+            useColoredCategoryChips = false
         )
 
     }

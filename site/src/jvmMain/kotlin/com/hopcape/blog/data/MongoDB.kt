@@ -2,6 +2,7 @@ package com.hopcape.blog.data
 
 import com.hopcape.blog.models.Constants.LATEST_POST_LIMIT
 import com.hopcape.blog.models.Constants.MAIN_POST_LIMIT
+import com.hopcape.blog.models.Constants.POPULAR_POST_LIMIT
 import com.hopcape.blog.models.Constants.POST_PER_PAGE
 import com.hopcape.blog.models.Constants.SPONSORED_POST_LIMIT
 import com.hopcape.blog.models.Post
@@ -201,6 +202,26 @@ class MongoDB(private val context: InitApiContext): MongoRepository {
                 )
                 .sort(descending(PostWithoutDetails::date))
                 .limit(SPONSORED_POST_LIMIT)
+                .toList()
+
+        }catch (e: Exception){
+            context.logger.error(e.message.toString())
+            emptyList()
+        }
+    }
+
+    override suspend fun readPopularPosts(skip: Int): List<PostWithoutDetails> {
+        return try {
+            postCollection
+                .withDocumentClass<PostWithoutDetails>()
+                .find(
+                    and(
+                        PostWithoutDetails::popular eq true,
+                    )
+                )
+                .sort(descending(PostWithoutDetails::date))
+                .skip(skip)
+                .limit(POPULAR_POST_LIMIT)
                 .toList()
 
         }catch (e: Exception){
