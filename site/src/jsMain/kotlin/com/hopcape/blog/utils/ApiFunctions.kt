@@ -167,6 +167,21 @@ suspend fun fetchLatestPosts(skip: Int): ApiListResponse {
     }
 }
 
+suspend fun fetchSponsoredPosts(): ApiListResponse {
+    return try {
+        val response = window.api.tryGet(
+            apiPath = "sponsored-posts"
+        )?.decodeToString()
+        ApiListResponse.Success(
+            data = response.parseData()
+        )
+    }catch (e: Exception){
+        e.printStackTrace()
+        ApiListResponse
+            .Error(e.message.toString())
+    }
+}
+
 suspend fun fetchPostBy(postId: String): ApiResponse {
     return try {
         val response = window.api.tryGet(

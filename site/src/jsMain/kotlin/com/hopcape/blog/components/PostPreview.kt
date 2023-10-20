@@ -71,7 +71,7 @@ fun PostPreview(
     selectableMode: Boolean = false,
     darkTheme: Boolean = false,
     vertical: Boolean = true,
-    thumbnailHeight: CSSSizeValue<CSSUnit.px>? = 320.px,
+    thumbnailHeight: CSSSizeValue<CSSUnit.px>? = 280.px,
     onSelect: (String) -> Unit = {},
     onDeselect: (String) -> Unit = {},
     useColoredCategories: Boolean = true,
@@ -122,7 +122,10 @@ fun PostPreview(
             )
         }
     } else {
-        Row(modifier = modifier.cursor(Cursor.Pointer)) {
+        Row(modifier = modifier
+            .onClick {  onClick(post._id) }
+            .cursor(Cursor.Pointer)
+        ) {
             PostContent(
                 post = post,
                 darkTheme = darkTheme,

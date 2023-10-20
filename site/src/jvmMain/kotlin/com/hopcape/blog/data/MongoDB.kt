@@ -3,6 +3,7 @@ package com.hopcape.blog.data
 import com.hopcape.blog.models.Constants.LATEST_POST_LIMIT
 import com.hopcape.blog.models.Constants.MAIN_POST_LIMIT
 import com.hopcape.blog.models.Constants.POST_PER_PAGE
+import com.hopcape.blog.models.Constants.SPONSORED_POST_LIMIT
 import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.PostWithoutDetails
 import com.hopcape.blog.models.User
@@ -181,6 +182,25 @@ class MongoDB(private val context: InitApiContext): MongoRepository {
                 .sort(descending(PostWithoutDetails::date))
                 .limit(LATEST_POST_LIMIT)
                 .skip(skip)
+                .toList()
+
+        }catch (e: Exception){
+            context.logger.error(e.message.toString())
+            emptyList()
+        }
+    }
+
+    override suspend fun readSponsoredPosts(): List<PostWithoutDetails> {
+        return try {
+            postCollection
+                .withDocumentClass<PostWithoutDetails>()
+                .find(
+                    and(
+                        PostWithoutDetails::sponsored eq true,
+                    )
+                )
+                .sort(descending(PostWithoutDetails::date))
+                .limit(SPONSORED_POST_LIMIT)
                 .toList()
 
         }catch (e: Exception){

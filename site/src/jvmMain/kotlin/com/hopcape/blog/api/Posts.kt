@@ -84,6 +84,19 @@ suspend fun getLatestPosts(context: ApiContext) {
     }
 }
 
+@Api(routeOverride = "sponsored-posts")
+suspend fun getSponsoredPosts(context: ApiContext) {
+    try {
+        val posts = context
+            .data
+            .getValue<MongoDB>()
+            .readSponsoredPosts()
+        context.res.setBody(posts)
+    } catch (e: Exception) {
+        context.res.setException(e)
+    }
+}
+
 @Api(routeOverride = "delete-posts")
 suspend fun deletePosts(context: ApiContext){
     try {

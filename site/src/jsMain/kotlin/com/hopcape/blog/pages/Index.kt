@@ -16,8 +16,10 @@ import com.hopcape.blog.models.PostWithoutDetails
 import com.hopcape.blog.sections.HeaderSection
 import com.hopcape.blog.sections.MainSection
 import com.hopcape.blog.sections.PostsSection
+import com.hopcape.blog.sections.SponsoredSection
 import com.hopcape.blog.utils.fetchLatestPosts
 import com.hopcape.blog.utils.fetchMainPosts
+import com.hopcape.blog.utils.fetchSponsoredPosts
 import com.varabyte.kobweb.compose.foundation.layout.Arrangement
 import com.varabyte.kobweb.compose.foundation.layout.Column
 import com.varabyte.kobweb.compose.ui.Alignment
@@ -37,6 +39,11 @@ fun HomePage() {
     val latestPosts = remember {
         mutableStateListOf<PostWithoutDetails>()
     }
+
+    val sponsoredPosts = remember {
+        mutableStateListOf<PostWithoutDetails>()
+    }
+
     var latestPostsToSkip by remember {
         mutableStateOf(0)
     }
@@ -58,6 +65,13 @@ fun HomePage() {
                     latestPostsToSkip += LATEST_POST_LIMIT
                     showMoreButton = response.data.size >= LATEST_POST_LIMIT
                 }
+            }
+        }
+        fetchSponsoredPosts().also { response ->
+            when(response){
+                is ApiListResponse.Error -> {}
+                is ApiListResponse.Idle -> {}
+                is ApiListResponse.Success -> sponsoredPosts.addAll(response.data)
             }
         }
     }
@@ -118,6 +132,12 @@ fun HomePage() {
             title = "Latest Posts",
             breakpoint = breakpoint,
             useColoredCategoryChips = false
+        )
+
+        SponsoredSection(
+            breakpoint = breakpoint,
+            posts = sponsoredPosts,
+            onClick = {}
         )
 
     }

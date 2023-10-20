@@ -23,4 +23,5 @@ interface MongoRepository {
 
     suspend fun readMainPosts(): List<PostWithoutDetails>
     suspend fun readLatestPosts(skip: Int): List<PostWithoutDetails>
+    suspend fun readSponsoredPosts(): List<PostWithoutDetails>
 }
