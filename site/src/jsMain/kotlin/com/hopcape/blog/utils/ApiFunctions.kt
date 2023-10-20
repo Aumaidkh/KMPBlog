@@ -152,6 +152,21 @@ suspend fun fetchMainPosts(): ApiListResponse {
     }
 }
 
+suspend fun fetchLatestPosts(skip: Int): ApiListResponse {
+    return try {
+        val response = window.api.tryGet(
+            apiPath = "latest-posts?skip=$skip"
+        )?.decodeToString()
+        ApiListResponse.Success(
+            data = response.parseData()
+        )
+    }catch (e: Exception){
+        e.printStackTrace()
+        ApiListResponse
+            .Error(e.message.toString())
+    }
+}
+
 suspend fun fetchPostBy(postId: String): ApiResponse {
     return try {
         val response = window.api.tryGet(

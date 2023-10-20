@@ -73,9 +73,11 @@ fun PostPreview(
     vertical: Boolean = true,
     thumbnailHeight: CSSSizeValue<CSSUnit.px>? = 320.px,
     onSelect: (String) -> Unit = {},
-    onDeselect: (String) -> Unit = {}
+    onDeselect: (String) -> Unit = {},
+    useColoredCategories: Boolean = true,
+    onClick: (String) -> Unit = {}
 ) {
-    val context = rememberPageContext()
+
     var checked by remember(selectableMode) { mutableStateOf(false) }
     if (vertical){
         Column(
@@ -104,10 +106,7 @@ fun PostPreview(
                             onDeselect(post._id)
                         }
                     } else {
-                        // When post is not selected only then
-                        context.router.navigateTo(
-                            pathQueryAndFragment = Screen.AdminCreate.passPostId(post._id)
-                        )
+                        onClick(post._id)
                     }
                 }
                 .cursor(Cursor.Pointer)
@@ -118,7 +117,8 @@ fun PostPreview(
                 selectableMode = selectableMode,
                 checked = checked,
                 vertical = vertical,
-                thumbnailHeight = thumbnailHeight
+                thumbnailHeight = thumbnailHeight,
+                useColoredCategories = useColoredCategories
             )
         }
     } else {
@@ -130,7 +130,8 @@ fun PostPreview(
                 checked = checked,
                 vertical = vertical,
                 thumbnailHeight = thumbnailHeight,
-                useFillMaxWidth = false
+                useFillMaxWidth = false,
+                useColoredCategories = useColoredCategories
             )
         }
     }
@@ -145,6 +146,7 @@ fun PostContent(
     vertical: Boolean,
     thumbnailHeight: CSSSizeValue<CSSUnit.px>?,
     useFillMaxWidth: Boolean = true,
+    useColoredCategories: Boolean = true
 ) {
     Image(
         modifier = Modifier
@@ -219,7 +221,8 @@ fun PostContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             CategoryChip(
-                category = post.category
+                category = post.category,
+                coloredCategories = useColoredCategories
             )
             if (selectableMode){
                 CheckboxInput(
@@ -233,48 +236,3 @@ fun PostContent(
     }
 }
 
-@Composable
-fun Posts(
-    breakpoint: Breakpoint,
-    posts: List<PostWithoutDetails>,
-    showMoreVisibility: Boolean,
-    onShowMore: () -> Unit,
-    selectableMode: Boolean = false,
-    onSelect: (String) -> Unit,
-    onDeselect: (String) -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(if (breakpoint > Breakpoint.MD) 80.percent else 90.percent),
-        verticalArrangement = Arrangement.Center
-    ) {
-        SimpleGrid(
-            modifier = Modifier.fillMaxWidth(),
-            numColumns = numColumns(base = 1, sm = 2, md = 3, lg = 4)
-        ){
-            posts.forEach { post ->
-                PostPreview(
-                    post = post,
-                    selectableMode = selectableMode,
-                    onSelect = onSelect,
-                    onDeselect = onDeselect
-                )
-            }
-        }
-        SpanText(
-            modifier = Modifier
-                .fillMaxWidth()
-                .margin(topBottom = 50.px)
-                .textAlign(TextAlign.Center)
-                .fontFamily(FONT_FAMILY)
-                .fontSize(16.px)
-                .fontWeight(FontWeight.SemiBold)
-                .cursor(Cursor.Pointer)
-                .visibility(if (showMoreVisibility) Visibility.Visible else Visibility.Hidden)
-                .onClick {
-                     onShowMore()
-                },
-            text = "Show more"
-        )
-    }
-}

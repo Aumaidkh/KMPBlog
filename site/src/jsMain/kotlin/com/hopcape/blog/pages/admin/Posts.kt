@@ -10,7 +10,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.hopcape.blog.components.AdminPageLayout
 import com.hopcape.blog.components.MessageBarPopup
-import com.hopcape.blog.components.Posts
+import com.hopcape.blog.components.PostsView
 import com.hopcape.blog.components.SearchBar
 import com.hopcape.blog.models.ApiListResponse
 import com.hopcape.blog.models.Constants.POST_PER_PAGE
@@ -253,7 +253,7 @@ fun PostsScreen() {
                 }
             }
 
-            Posts(
+            PostsView(
                 posts = posts,
                 breakpoint = breakPoint,
                 showMoreVisibility = showMoreVisibility,
@@ -301,6 +301,12 @@ fun PostsScreen() {
                 },
                 onSelect = {
                     selectedPosts.add(it)
+                },
+                onClick = {
+                    // When post is not selected only then
+                    context.router.navigateTo(
+                        pathQueryAndFragment = Screen.AdminCreate.passPostId(it)
+                    )
                 }
             )
         }

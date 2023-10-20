@@ -70,6 +70,20 @@ suspend fun getMainPosts(context: ApiContext) {
     }
 }
 
+@Api(routeOverride = "latest-posts")
+suspend fun getLatestPosts(context: ApiContext) {
+    try {
+        val skip = context.req.params["skip"]?.toInt() ?: 0
+        val posts = context
+            .data
+            .getValue<MongoDB>()
+            .readLatestPosts(skip)
+        context.res.setBody(posts)
+    } catch (e: Exception) {
+        context.res.setException(e)
+    }
+}
+
 @Api(routeOverride = "delete-posts")
 suspend fun deletePosts(context: ApiContext){
     try {
