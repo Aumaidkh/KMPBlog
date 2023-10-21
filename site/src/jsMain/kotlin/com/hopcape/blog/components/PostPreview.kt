@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import com.hopcape.blog.models.PostWithoutDetails
 import com.hopcape.blog.models.Theme
 import com.hopcape.blog.navigation.Screen
+import com.hopcape.blog.styles.PostPreviewStyle
 import com.hopcape.blog.utils.Constants.FONT_FAMILY
 import com.hopcape.blog.utils.parseDateString
 import com.varabyte.kobweb.compose.css.AspectRatio
@@ -55,6 +56,7 @@ import com.varabyte.kobweb.silk.components.graphics.Image
 import com.varabyte.kobweb.silk.components.layout.SimpleGrid
 import com.varabyte.kobweb.silk.components.layout.numColumns
 import com.varabyte.kobweb.silk.components.style.breakpoint.Breakpoint
+import com.varabyte.kobweb.silk.components.style.toModifier
 import com.varabyte.kobweb.silk.components.text.SpanText
 import org.jetbrains.compose.web.css.CSSSizeValue
 import org.jetbrains.compose.web.css.CSSUnit
@@ -81,7 +83,9 @@ fun PostPreview(
     var checked by remember(selectableMode) { mutableStateOf(false) }
     if (vertical){
         Column(
-            modifier = modifier
+            modifier = PostPreviewStyle
+                .toModifier()
+                .then(modifier)
                 .fillMaxWidth(if (darkTheme) 100.percent else 95.percent)
                 .margin(bottom = 24.px)
                 .padding(all = if (selectableMode) 10.px else 0.px)
@@ -122,7 +126,9 @@ fun PostPreview(
             )
         }
     } else {
-        Row(modifier = modifier
+        Row(modifier = PostPreviewStyle
+            .toModifier()
+            .then(modifier)
             .onClick {  onClick(post._id) }
             .cursor(Cursor.Pointer)
         ) {
@@ -151,6 +157,7 @@ fun PostContent(
     useFillMaxWidth: Boolean = true,
     useColoredCategories: Boolean = true
 ) {
+
     Image(
         modifier = Modifier
             .margin(bottom = if (darkTheme) 20.px else 16.px)

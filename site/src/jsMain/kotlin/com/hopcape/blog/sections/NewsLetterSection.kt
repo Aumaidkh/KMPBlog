@@ -84,7 +84,7 @@ fun NewsLetterSection(
 
     Box(
         modifier = Modifier
-            .margin(topBottom = 250.px)
+            .margin(bottom = 250.px)
             .fillMaxWidth()
             .maxWidth(SECTION_PAGE_WIDTH.px)
     ) {

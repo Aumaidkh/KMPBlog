@@ -5,6 +5,7 @@ import com.hopcape.blog.components.PostPreview
 import com.hopcape.blog.models.ApiListResponse
 import com.hopcape.blog.models.PostWithoutDetails
 import com.hopcape.blog.models.Theme
+import com.hopcape.blog.navigation.Screen
 import com.hopcape.blog.utils.Constants.SECTION_PAGE_WIDTH
 import com.varabyte.kobweb.compose.foundation.layout.Box
 import com.varabyte.kobweb.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import com.varabyte.kobweb.compose.ui.modifiers.fillMaxSize
 import com.varabyte.kobweb.compose.ui.modifiers.fillMaxWidth
 import com.varabyte.kobweb.compose.ui.modifiers.margin
 import com.varabyte.kobweb.compose.ui.modifiers.maxWidth
+import com.varabyte.kobweb.core.rememberPageContext
 import com.varabyte.kobweb.silk.components.style.breakpoint.Breakpoint
 import org.jetbrains.compose.web.css.AlignContent
 import org.jetbrains.compose.web.css.percent
@@ -56,6 +58,7 @@ fun MainPosts(
     posts: List<PostWithoutDetails>,
     breakpoint: Breakpoint
 ) {
+    val context = rememberPageContext()
     Row(
         modifier = Modifier
             .fillMaxWidth(
@@ -67,7 +70,13 @@ fun MainPosts(
             PostPreview(
                 thumbnailHeight = 640.px,
                 darkTheme = true,
-                post = posts.first()
+                post = posts.first(),
+                onClick = {
+                    val postId = posts.first()._id
+                    context.router.navigateTo(
+                        pathQueryAndFragment = Screen.Post.passPostId(postId)
+                    )
+                }
             )
             Column(
                 modifier = Modifier
@@ -79,7 +88,13 @@ fun MainPosts(
                         thumbnailHeight = 200.px,
                         darkTheme = true,
                         post = post,
-                        vertical = false
+                        vertical = false,
+                        onClick = {
+                            val postId = post._id
+                            context.router.navigateTo(
+                                pathQueryAndFragment = Screen.Post.passPostId(postId)
+                            )
+                        }
                     )
                 }
             }
@@ -91,7 +106,13 @@ fun MainPosts(
             ) {
                 PostPreview(
                     darkTheme = true,
-                    post = posts.first()
+                    post = posts.first(),
+                    onClick = {
+                        val postId = posts.first()._id
+                        context.router.navigateTo(
+                            pathQueryAndFragment = Screen.Post.passPostId(postId)
+                        )
+                    }
                 )
             }
             Box(
@@ -101,14 +122,26 @@ fun MainPosts(
             ) {
                 PostPreview(
                     darkTheme = true,
-                    post = posts[1]
+                    post = posts[1],
+                    onClick = {
+                        val postId = posts[1]._id
+                        context.router.navigateTo(
+                            pathQueryAndFragment = Screen.Post.passPostId(postId)
+                        )
+                    }
                 )
             }
 
         } else {
             PostPreview(
                 darkTheme = true,
-                post = posts.first()
+                post = posts.first(),
+                onClick = {
+                    val postId = posts.first()._id
+                    context.router.navigateTo(
+                        pathQueryAndFragment = Screen.Post.passPostId(postId)
+                    )
+                }
             )
         }
     }

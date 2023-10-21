@@ -18,6 +18,8 @@ import com.hopcape.blog.models.Constants.POST_PER_PAGE
 import com.hopcape.blog.models.Constants.QUERY_PARAM
 import com.hopcape.blog.models.PostWithoutDetails
 import com.hopcape.blog.models.Theme
+import com.hopcape.blog.navigation.Screen
+import com.hopcape.blog.sections.FooterSection
 import com.hopcape.blog.sections.Header
 import com.hopcape.blog.sections.PostsSection
 import com.hopcape.blog.utils.Constants
@@ -41,6 +43,7 @@ import com.varabyte.kobweb.compose.ui.modifiers.fontFamily
 import com.varabyte.kobweb.compose.ui.modifiers.fontSize
 import com.varabyte.kobweb.compose.ui.modifiers.fontWeight
 import com.varabyte.kobweb.compose.ui.modifiers.margin
+import com.varabyte.kobweb.compose.ui.modifiers.maxHeight
 import com.varabyte.kobweb.compose.ui.modifiers.textAlign
 import com.varabyte.kobweb.core.Page
 import com.varabyte.kobweb.core.rememberPageContext
@@ -49,6 +52,7 @@ import com.varabyte.kobweb.silk.theme.breakpoint.rememberBreakpoint
 import kotlinx.browser.document
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.vh
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.get
 
@@ -138,7 +142,8 @@ fun SearchPage() {
 
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .maxHeight(100.vh),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -240,13 +245,17 @@ fun SearchPage() {
                     }
                 },
                 onClick = {
-
+                    context.router.navigateTo(
+                        pathQueryAndFragment = Screen.Post.passPostId(it)
+                    )
                 },
                 useColoredCategoryChips = false,
             )
         } else {
             LoadingIndicator()
         }
+
+        FooterSection()
     }
 
 }

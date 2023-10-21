@@ -53,6 +53,7 @@ object Id {
     const val subtitleInput = "subtitleInput"
     const val thumbnailInput = "thumbnailInput"
     const val contentInput = "contentInput"
+    const val postContent = "postContent"
     const val linkHrefInput = "linkHrefInput"
     const val linkTitleInput = "linkTitleInput"
     const val searchInput = "searchInput"

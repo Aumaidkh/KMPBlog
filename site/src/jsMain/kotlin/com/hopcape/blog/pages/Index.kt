@@ -14,6 +14,8 @@ import com.hopcape.blog.models.ApiListResponse
 import com.hopcape.blog.models.Constants.LATEST_POST_LIMIT
 import com.hopcape.blog.models.Constants.POPULAR_POST_LIMIT
 import com.hopcape.blog.models.PostWithoutDetails
+import com.hopcape.blog.navigation.Screen
+import com.hopcape.blog.sections.FooterSection
 import com.hopcape.blog.sections.HeaderSection
 import com.hopcape.blog.sections.MainSection
 import com.hopcape.blog.sections.NewsLetterSection
@@ -30,12 +32,14 @@ import com.varabyte.kobweb.compose.ui.Alignment
 import com.varabyte.kobweb.compose.ui.Modifier
 import com.varabyte.kobweb.compose.ui.modifiers.fillMaxSize
 import com.varabyte.kobweb.core.Page
+import com.varabyte.kobweb.core.rememberPageContext
 import com.varabyte.kobweb.silk.theme.breakpoint.rememberBreakpoint
 import kotlinx.coroutines.launch
 
 @Page
 @Composable
 fun HomePage() {
+    val context = rememberPageContext()
     val scope = rememberCoroutineScope()
     var mainPosts by remember {
         mutableStateOf<ApiListResponse>(ApiListResponse.Idle)
@@ -47,6 +51,7 @@ fun HomePage() {
     val sponsoredPosts = remember {
         mutableStateListOf<PostWithoutDetails>()
     }
+
 
     val popularPosts = remember { mutableStateListOf<PostWithoutDetails>() }
 
@@ -130,7 +135,11 @@ fun HomePage() {
         PostsSection(
             posts = latestPosts,
             showMoreVisibility = showMoreButton,
-            onClick = {},
+            onClick = {
+                context.router.navigateTo(
+                    pathQueryAndFragment = Screen.Post.passPostId(it)
+                )
+            },
             onShowMore = {
                 scope.launch {
                     fetchLatestPosts(latestPostsToSkip).also { response ->
@@ -154,13 +163,21 @@ fun HomePage() {
         SponsoredSection(
             breakpoint = breakpoint,
             posts = sponsoredPosts,
-            onClick = {}
+            onClick = {
+                context.router.navigateTo(
+                    pathQueryAndFragment = Screen.Post.passPostId(it)
+                )
+            }
         )
 
         PostsSection(
             posts = popularPosts,
             showMoreVisibility = showMoreButtonInPopular,
-            onClick = {},
+            onClick = {
+                context.router.navigateTo(
+                    pathQueryAndFragment = Screen.Post.passPostId(it)
+                )
+            },
             onShowMore = {
                 scope.launch {
                     fetchPopularPosts(popularPostsToSkip).also { response ->
@@ -184,6 +201,8 @@ fun HomePage() {
         NewsLetterSection(
             breakpoint = breakpoint
         )
+
+        FooterSection()
 
     }
 }

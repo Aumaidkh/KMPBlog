@@ -7,6 +7,7 @@ import com.hopcape.blog.utils.Constants.SECTION_PAGE_WIDTH
 import com.varabyte.kobweb.compose.foundation.layout.Box
 import com.varabyte.kobweb.compose.ui.Alignment
 import com.varabyte.kobweb.compose.ui.Modifier
+import com.varabyte.kobweb.compose.ui.modifiers.fillMaxHeight
 import com.varabyte.kobweb.compose.ui.modifiers.fillMaxWidth
 import com.varabyte.kobweb.compose.ui.modifiers.margin
 import com.varabyte.kobweb.compose.ui.modifiers.maxWidth
@@ -27,6 +28,7 @@ fun PostsSection(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .fillMaxHeight()
             .margin(topBottom = 50.px)
             .maxWidth(SECTION_PAGE_WIDTH.px),
         contentAlignment = Alignment.TopCenter

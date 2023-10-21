@@ -34,4 +34,9 @@ sealed class Screen(val route: String){
     }
 
     data object Home: Screen("/")
+    data object Post: Screen("/posts"){
+        fun passPostId(id: String): String {
+            return "/posts?$QUERY_POST_ID=$id"
+        }
+    }
 }

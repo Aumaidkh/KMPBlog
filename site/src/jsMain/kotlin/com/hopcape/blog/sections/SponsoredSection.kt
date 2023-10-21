@@ -39,6 +39,7 @@ fun SponsoredSection(
 ) {
     Box(
         modifier = Modifier
+            .margin(bottom = 100.px)
             .fillMaxWidth()
             .backgroundColor(Theme.LightGray.rgb),
         contentAlignment = Alignment.Center

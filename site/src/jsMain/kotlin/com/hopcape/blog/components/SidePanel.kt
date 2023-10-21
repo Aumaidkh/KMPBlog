@@ -312,14 +312,19 @@ fun OverflowSidePanel(
                         .color(Colors.White)
                         .cursor(Cursor.Pointer)
                         .onClick {
-                            onMenuClose()
+                             scope.launch {
+                                 translateX = (-100).percent
+                                 opacity = 0.percent
+                                 delay(500)
+                                 onMenuClose()
+                             }
                         },
                     size = IconSize.LG
                 )
                 Image(
                     modifier = Modifier
                         .height(100.px)
-                        .width(130.px)
+                        .width(110.px)
                         .cursor(Cursor.Pointer)
                         .onClick {
                             context
