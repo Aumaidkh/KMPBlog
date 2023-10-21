@@ -64,6 +64,7 @@ fun NewsLetterSection(
 
     if (invalidEmailPopup){
         MessageBarPopup(
+            breakpoint = breakpoint,
             message = Message.Error("Invalid Email"),
             onDialogDismissed = {
                 invalidEmailPopup = false
@@ -73,6 +74,7 @@ fun NewsLetterSection(
 
     responseMessage?.let {
         MessageBarPopup(
+            breakpoint = breakpoint,
             message = Message.Success(it),
             onDialogDismissed = {
                 responseMessage = null

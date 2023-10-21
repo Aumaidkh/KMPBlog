@@ -314,6 +314,7 @@ fun PostsScreen() {
 
     if (message != null){
         MessageBarPopup(
+            breakpoint = breakPoint,
             message = message!!,
             onDialogDismissed = {
                 message = null

@@ -12,6 +12,7 @@ import com.hopcape.blog.models.Message
 import com.hopcape.blog.models.Theme
 import com.hopcape.blog.utils.Constants.FONT_FAMILY
 import com.hopcape.blog.utils.Id
+import com.hopcape.blog.utils.isMobile
 import com.hopcape.blog.utils.noBorder
 import com.varabyte.kobweb.compose.css.CSSTransition
 import com.varabyte.kobweb.compose.css.FontWeight
@@ -47,6 +48,7 @@ import com.varabyte.kobweb.compose.ui.modifiers.width
 import com.varabyte.kobweb.compose.ui.modifiers.zIndex
 import com.varabyte.kobweb.compose.ui.styleModifier
 import com.varabyte.kobweb.compose.ui.toAttrs
+import com.varabyte.kobweb.silk.components.style.breakpoint.Breakpoint
 import com.varabyte.kobweb.silk.components.text.SpanText
 import kotlinx.browser.document
 import kotlinx.coroutines.delay
@@ -194,6 +196,7 @@ fun LinkPopup(
 @Composable
 fun MessageBarPopup(
     message: Message,
+    breakpoint: Breakpoint,
     onDialogDismissed: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -220,12 +223,18 @@ fun MessageBarPopup(
     ) {
         Row(
             modifier = Modifier
-                .margin(all = 16.px)
+                .margin(
+                    top = 24.px,
+                    right = if (breakpoint.isMobile()) 40.px else 120.px
+                )
                 .borderRadius(r = 4.px)
                 .noBorder()
                 .fillMaxWidth(50.percent)
-                .height(120.px)
-                .padding(leftRight = 20.px, topBottom = 20.px)
+                .height(if (breakpoint.isMobile()) 60.px else 120.px)
+                .padding(
+                    leftRight = if (breakpoint.isMobile()) 10.px else 20.px,
+                    topBottom = if (breakpoint.isMobile()) 20.px else 20.px
+                )
                 .backgroundColor(Colors.White)
                 .transition(CSSTransition(
                     property = TransitionProperty.All,
@@ -242,7 +251,7 @@ fun MessageBarPopup(
                     .fillMaxHeight()
                     .borderRadius(r = 1.px)
                     .backgroundColor(Colors.WhiteSmoke)
-                    .width(10.px)
+                    .width(if (breakpoint.isMobile()) 5.px else 10.px)
             )
 
             Column(
@@ -254,17 +263,17 @@ fun MessageBarPopup(
                 SpanText(
                     modifier = Modifier
                         .fontFamily(FONT_FAMILY)
-                        .fontSize(24.px)
+                        .fontSize(if (breakpoint.isMobile()) 14.px else 24.px)
                         .fontWeight(FontWeight.Medium)
                         .color(message.getColor()),
                     text = message::class.simpleName.toString()
                 )
                 SpanText(
                     modifier = Modifier
-                        .margin(bottom = 24.px)
+                        .margin(bottom = if (breakpoint.isMobile()) 5.px else 24.px)
                         .fontFamily(FONT_FAMILY)
-                        .fontSize(16.px)
-                        .fontWeight(FontWeight.Medium)
+                        .fontSize(if (breakpoint.isMobile()) 11.px else 16.px)
+                        .fontWeight(if (breakpoint.isMobile()) FontWeight.Normal else FontWeight.Medium)
                         .color(Colors.Black),
                     text = message.data
                 )
@@ -272,7 +281,7 @@ fun MessageBarPopup(
                 Div(
                     attrs = Modifier
                         .fillMaxWidth()
-                        .height(10.px)
+                        .height(if (breakpoint.isMobile()) 5.px else 10.px)
                         .classNames("progress")
                         .toAttrs{
                             attr("role","progressbar")

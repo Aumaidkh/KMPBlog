@@ -502,6 +502,7 @@ fun CreateScreen() {
 
     if (message != null){
         MessageBarPopup(
+            breakpoint = breakpoint,
             message = message!!,
             onDialogDismissed = {
                 message = null
