@@ -2,7 +2,9 @@ package com.hopcape.blog.utils
 
 import com.hopcape.blog.models.ApiListResponse
 import com.hopcape.blog.models.ApiResponse
+import com.hopcape.blog.models.Category
 import com.hopcape.blog.models.Constants.AUTHOR_PARAM
+import com.hopcape.blog.models.Constants.CATEGORY_PARAM
 import com.hopcape.blog.models.Constants.QUERY_PARAM
 import com.hopcape.blog.models.Constants.QUERY_POST_ID
 import com.hopcape.blog.models.Constants.SKIP_PARAM
@@ -157,6 +159,21 @@ suspend fun fetchLatestPosts(skip: Int): ApiListResponse {
     return try {
         val response = window.api.tryGet(
             apiPath = "latest-posts?skip=$skip"
+        )?.decodeToString()
+        ApiListResponse.Success(
+            data = response.parseData()
+        )
+    }catch (e: Exception){
+        e.printStackTrace()
+        ApiListResponse
+            .Error(e.message.toString())
+    }
+}
+
+suspend fun searchPostsByCategory(category: Category,skip: Int = 0): ApiListResponse {
+    return try {
+        val response = window.api.tryGet(
+            apiPath = "search-posts-by-category?$CATEGORY_PARAM=${category.name}&$SKIP_PARAM=$skip"
         )?.decodeToString()
         ApiListResponse.Success(
             data = response.parseData()

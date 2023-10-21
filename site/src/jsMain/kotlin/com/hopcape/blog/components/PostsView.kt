@@ -31,6 +31,7 @@ import org.jetbrains.compose.web.css.px
 @Composable
 fun PostsView(
     breakpoint: Breakpoint,
+    centeredTitle: Boolean = false,
     title: String? = null,
     posts: List<PostWithoutDetails>,
     showMoreVisibility: Boolean,
@@ -49,11 +50,15 @@ fun PostsView(
         title?.let {
             SpanText(
                 modifier = Modifier
-                    .margin(bottom = 25.px)
+                    .fillMaxWidth()
+                    .textAlign(
+                        if (centeredTitle) TextAlign.Center else TextAlign.Left
+                    )
+                    .margin(bottom = if (centeredTitle) 50.px else 25.px)
                     .color(Colors.Black)
                     .fontFamily(Constants.FONT_FAMILY)
                     .fontWeight(FontWeight.Medium)
-                    .fontSize(24.px),
+                    .fontSize(20.px),
                 text = title
             )
         }

@@ -1,5 +1,6 @@
 package com.hopcape.blog.data
 
+import com.hopcape.blog.models.Category
 import com.hopcape.blog.models.Constants.LATEST_POST_LIMIT
 import com.hopcape.blog.models.Constants.MAIN_POST_LIMIT
 import com.hopcape.blog.models.Constants.POPULAR_POST_LIMIT
@@ -231,6 +232,28 @@ class MongoDB(private val context: InitApiContext): MongoRepository {
             emptyList()
         }
     }
+
+    override suspend fun searchPostsByCategory(category: Category, skip: Int): List<PostWithoutDetails> {
+        return try {
+            postCollection
+                .withDocumentClass<PostWithoutDetails>()
+                .find(
+                    and(
+                        PostWithoutDetails::popular eq true,
+                        PostWithoutDetails::category eq category
+                    )
+                )
+                .sort(descending(PostWithoutDetails::date))
+                .skip(skip)
+                .limit(POPULAR_POST_LIMIT)
+                .toList()
+
+        }catch (e: Exception){
+            context.logger.error(e.message.toString())
+            emptyList()
+        }
+    }
+
 
     override suspend fun subscribe(newsLetter: NewsLetter): String {
         val result = newsLetterCollection

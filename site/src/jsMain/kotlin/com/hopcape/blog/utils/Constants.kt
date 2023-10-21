@@ -13,6 +13,8 @@ object Constants {
 object Resource {
     object Image {
         const val logo = "/logo.svg"
+        const val blogLogo = "logo.svg"
+        const val searchLogo = "/logo.svg"
         const val joke = "/joke.png"
     }
 

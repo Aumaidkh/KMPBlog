@@ -2,6 +2,9 @@ package com.hopcape.blog.api
 
 import com.hopcape.blog.data.MongoDB
 import com.hopcape.blog.models.ApiListResponse
+import com.hopcape.blog.models.Category
+import com.hopcape.blog.models.Constants.CATEGORY_PARAM
+import com.hopcape.blog.models.Constants.SKIP_PARAM
 import com.hopcape.blog.models.Post
 import com.varabyte.kobweb.api.Api
 import com.varabyte.kobweb.api.ApiContext
@@ -41,7 +44,7 @@ suspend fun updatePost(context: ApiContext){
 @Api(routeOverride = "posts")
 suspend fun getPosts(context: ApiContext) {
     try {
-        val skip = context.req.params["skip"]?.toInt() ?: 0
+        val skip = context.req.params[SKIP_PARAM]?.toInt() ?: 0
         val author = context.req.params["author"] ?: ""
 
         val posts = context
@@ -50,6 +53,25 @@ suspend fun getPosts(context: ApiContext) {
             .getMyPosts(
                 skip = skip,
                 author = author
+            )
+        context.res.setBody(posts)
+    } catch (e: Exception) {
+        context.res.setException(e)
+    }
+}
+
+@Api(routeOverride = "search-posts-by-category")
+suspend fun searchPostsByCategory(context: ApiContext) {
+    try {
+        val skip = context.req.params[SKIP_PARAM]?.toInt() ?: 0
+        val category = context.req.params[CATEGORY_PARAM]
+
+        val posts = context
+            .data
+            .getValue<MongoDB>()
+            .searchPostsByCategory(
+                skip = skip,
+                category = category?.let { Category.valueOf(it) } ?: Category.Programming
             )
         context.res.setBody(posts)
     } catch (e: Exception) {
@@ -73,7 +95,7 @@ suspend fun getMainPosts(context: ApiContext) {
 @Api(routeOverride = "latest-posts")
 suspend fun getLatestPosts(context: ApiContext) {
     try {
-        val skip = context.req.params["skip"]?.toInt() ?: 0
+        val skip = context.req.params[SKIP_PARAM]?.toInt() ?: 0
         val posts = context
             .data
             .getValue<MongoDB>()
@@ -100,7 +122,7 @@ suspend fun getSponsoredPosts(context: ApiContext) {
 @Api(routeOverride = "popular-posts")
 suspend fun getPopularPosts(context: ApiContext) {
     try {
-        val skip = context.req.params["skip"]?.toInt() ?: 0
+        val skip = context.req.params[SKIP_PARAM]?.toInt() ?: 0
         val posts = context
             .data
             .getValue<MongoDB>()
@@ -129,7 +151,7 @@ suspend fun deletePosts(context: ApiContext){
 suspend fun searchPostsByTitle(context: ApiContext){
     try {
         val query = context.req.params["query"] ?: ""
-        val skip = context.req.params["skip"]?.toInt() ?: 0
+        val skip = context.req.params[SKIP_PARAM]?.toInt() ?: 0
         val result = context
             .data
             .getValue<MongoDB>()

@@ -1,5 +1,6 @@
 package com.hopcape.blog.data
 
+import com.hopcape.blog.models.Category
 import com.hopcape.blog.models.NewsLetter
 import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.PostWithoutDetails
@@ -26,6 +27,8 @@ interface MongoRepository {
     suspend fun readLatestPosts(skip: Int): List<PostWithoutDetails>
     suspend fun readSponsoredPosts(): List<PostWithoutDetails>
     suspend fun readPopularPosts(skip: Int): List<PostWithoutDetails>
+
+    suspend fun searchPostsByCategory(category: Category, skip: Int): List<PostWithoutDetails>
 
     /**
      * News Letter*/

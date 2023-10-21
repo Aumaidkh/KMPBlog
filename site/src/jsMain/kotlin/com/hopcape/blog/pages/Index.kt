@@ -19,6 +19,7 @@ import com.hopcape.blog.sections.MainSection
 import com.hopcape.blog.sections.NewsLetterSection
 import com.hopcape.blog.sections.PostsSection
 import com.hopcape.blog.sections.SponsoredSection
+import com.hopcape.blog.utils.Resource
 import com.hopcape.blog.utils.fetchLatestPosts
 import com.hopcape.blog.utils.fetchMainPosts
 import com.hopcape.blog.utils.fetchPopularPosts
@@ -109,7 +110,7 @@ fun HomePage() {
                 },
                 content = {
                     CategoryNavigationItems(
-                        vertical = true
+                        vertical = true,
                     )
                 }
             )
@@ -118,7 +119,8 @@ fun HomePage() {
             breakpoint = breakpoint,
             onMenuOpened = {
                 overFlowMenuOpened = true
-            }
+            },
+            logo = Resource.Image.blogLogo
         )
         MainSection(
             breakpoint = breakpoint,

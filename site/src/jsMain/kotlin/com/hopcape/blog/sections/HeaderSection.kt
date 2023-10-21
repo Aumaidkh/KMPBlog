@@ -9,14 +9,17 @@ import com.hopcape.blog.components.CategoryNavigationItems
 import com.hopcape.blog.components.SearchBar
 import com.hopcape.blog.models.Category
 import com.hopcape.blog.models.Theme
+import com.hopcape.blog.navigation.Screen
 import com.hopcape.blog.styles.CategoryItemStyle
 import com.hopcape.blog.utils.Constants.FONT_FAMILY
 import com.hopcape.blog.utils.Constants.HEADER_HEIGHT
 import com.hopcape.blog.utils.Constants.SECTION_PAGE_WIDTH
+import com.hopcape.blog.utils.Id
 import com.hopcape.blog.utils.Resource
 import com.hopcape.blog.utils.isLaptop
 import com.hopcape.blog.utils.isLargeDevice
 import com.hopcape.blog.utils.isMobile
+import com.varabyte.kobweb.compose.css.BackgroundColor
 import com.varabyte.kobweb.compose.css.Cursor
 import com.varabyte.kobweb.compose.css.FontWeight
 import com.varabyte.kobweb.compose.css.TextDecorationLine
@@ -39,6 +42,7 @@ import com.varabyte.kobweb.compose.ui.modifiers.maxWidth
 import com.varabyte.kobweb.compose.ui.modifiers.onClick
 import com.varabyte.kobweb.compose.ui.modifiers.textDecorationLine
 import com.varabyte.kobweb.compose.ui.modifiers.width
+import com.varabyte.kobweb.core.rememberPageContext
 import com.varabyte.kobweb.silk.components.graphics.Image
 import com.varabyte.kobweb.silk.components.icons.fa.FaBars
 import com.varabyte.kobweb.silk.components.icons.fa.FaXmark
@@ -46,18 +50,24 @@ import com.varabyte.kobweb.silk.components.icons.fa.IconSize
 import com.varabyte.kobweb.silk.components.navigation.Link
 import com.varabyte.kobweb.silk.components.style.breakpoint.Breakpoint
 import com.varabyte.kobweb.silk.components.style.toModifier
+import kotlinx.browser.document
+import org.jetbrains.compose.web.css.CSSColorValue
+import org.jetbrains.compose.web.css.Color
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
+import org.w3c.dom.HTMLInputElement
 
 @Composable
 fun HeaderSection(
     breakpoint: Breakpoint,
-    onMenuOpened: () -> Unit
+    onMenuOpened: () -> Unit,
+    logo: String,
+    backgroundColor: CSSColorValue = Theme.Secondary.rgb
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .backgroundColor(Theme.Secondary.rgb),
+            .backgroundColor(backgroundColor),
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -69,7 +79,8 @@ fun HeaderSection(
         ) {
             Header(
                 breakpoint = breakpoint,
-                onMenuClicked = onMenuOpened
+                onMenuClicked = onMenuOpened,
+                logo = logo
             )
         }
     }
@@ -78,8 +89,11 @@ fun HeaderSection(
 @Composable
 fun Header(
     breakpoint: Breakpoint,
-    onMenuClicked: () -> Unit
+    onMenuClicked: () -> Unit,
+    logo: String,
+    selectedCategory: Category? = null
 ) {
+    val context = rememberPageContext()
     var fullSearchBar by remember {
         mutableStateOf(false)
     }
@@ -121,14 +135,18 @@ fun Header(
                     .margin(right = 50.px)
                     .width(if (breakpoint.isMobile()) 70.px else 100.px)
                     .cursor(Cursor.Pointer)
-                    .onClick {  },
-                src = Resource.Image.logo.removePrefix("/"),
+                    .onClick {
+                             context.router.navigateTo(pathQueryAndFragment = Screen.Home.route)
+                    },
+                src = logo,
                 desc = "Logo"
             )
         }
         // Categories
         if (breakpoint.isLargeDevice()){
-            CategoryNavigationItems()
+            CategoryNavigationItems(
+                selectedCategory = selectedCategory
+            )
         }
         Spacer()
         SearchBar(
@@ -138,7 +156,14 @@ fun Header(
             onSearchIconClicked = {
                  fullSearchBar = it
             },
-            onEnterClicked = {}
+            onEnterClicked = {
+                val query = (document.getElementById(Id.searchInput) as HTMLInputElement).value
+                context.router.navigateTo(
+                    pathQueryAndFragment = Screen.SearchPage.searchByTitle(
+                        query = query
+                    )
+                )
+            }
         )
     }
 }
