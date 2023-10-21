@@ -54,4 +54,7 @@ object Id {
     const val linkHrefInput = "linkHrefInput"
     const val linkTitleInput = "linkTitleInput"
     const val searchInput = "searchInput"
+
+    // Website Home Screen
+    const val emailInput = "emailInput"
 }

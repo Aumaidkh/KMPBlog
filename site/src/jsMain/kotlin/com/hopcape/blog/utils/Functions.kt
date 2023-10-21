@@ -61,12 +61,12 @@ fun Modifier.noBorder(): Modifier {
         .border(
             width = 0.px,
             color = Colors.Transparent,
-            style = LineStyle.None
+            style = LineStyle.Solid
         )
         .outline(
             width = 0.px,
             color = Colors.Transparent,
-            style = LineStyle.None
+            style = LineStyle.Solid
         )
 }
 
@@ -166,6 +166,11 @@ fun Long.parseDateString() = Date(this).toLocaleDateString()
 
 fun parseSwitchText(posts: List<String>): String {
     return if (posts.isEmpty()) "Select" else if (posts.size == 1) "1 Post Selected" else "${posts.size} Posts Selected"
+}
+
+fun isValidEmail(email: String): Boolean {
+    val regex ="^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$"
+    return regex.toRegex().matches(email)
 }
 
 fun Breakpoint.isLaptop() = this > Breakpoint.MD

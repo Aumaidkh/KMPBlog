@@ -16,6 +16,7 @@ import com.hopcape.blog.models.Constants.POPULAR_POST_LIMIT
 import com.hopcape.blog.models.PostWithoutDetails
 import com.hopcape.blog.sections.HeaderSection
 import com.hopcape.blog.sections.MainSection
+import com.hopcape.blog.sections.NewsLetterSection
 import com.hopcape.blog.sections.PostsSection
 import com.hopcape.blog.sections.SponsoredSection
 import com.hopcape.blog.utils.fetchLatestPosts
@@ -176,6 +177,10 @@ fun HomePage() {
             title = "Popular Posts",
             breakpoint = breakpoint,
             useColoredCategoryChips = false
+        )
+
+        NewsLetterSection(
+            breakpoint = breakpoint
         )
 
     }

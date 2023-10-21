@@ -6,6 +6,7 @@ import com.hopcape.blog.models.Constants.AUTHOR_PARAM
 import com.hopcape.blog.models.Constants.QUERY_PARAM
 import com.hopcape.blog.models.Constants.QUERY_POST_ID
 import com.hopcape.blog.models.Constants.SKIP_PARAM
+import com.hopcape.blog.models.NewsLetter
 import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.RandomJoke
 import com.hopcape.blog.models.User
@@ -238,6 +239,17 @@ suspend fun searchPostsByTitle(
         e.printStackTrace()
         ApiListResponse
             .Error(e.message.toString())
+    }
+}
+
+suspend fun subscribeNewsletter(newsLetter: NewsLetter): String {
+    return try {
+        window.api.tryPost(
+            apiPath = "subscribe",
+            body = Json.encodeToString(newsLetter).encodeToByteArray()
+        )?.decodeToString().toString()
+    }catch (e: Exception){
+        e.message.toString()
     }
 }
 

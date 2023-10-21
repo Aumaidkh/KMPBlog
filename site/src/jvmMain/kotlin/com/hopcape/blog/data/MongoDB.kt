@@ -5,6 +5,7 @@ import com.hopcape.blog.models.Constants.MAIN_POST_LIMIT
 import com.hopcape.blog.models.Constants.POPULAR_POST_LIMIT
 import com.hopcape.blog.models.Constants.POST_PER_PAGE
 import com.hopcape.blog.models.Constants.SPONSORED_POST_LIMIT
+import com.hopcape.blog.models.NewsLetter
 import com.hopcape.blog.models.Post
 import com.hopcape.blog.models.PostWithoutDetails
 import com.hopcape.blog.models.User
@@ -38,6 +39,7 @@ class MongoDB(private val context: InitApiContext): MongoRepository {
     private val database = client.getDatabase(DATABASE_NAME)
     private val userCollection = database.getCollection<User>("user")
     private val postCollection = database.getCollection<Post>("post")
+    private val newsLetterCollection = database.getCollection<NewsLetter>("newsletter")
     override suspend fun checkUserExistence(user: User): User? {
         return try {
             userCollection.find(
@@ -227,6 +229,29 @@ class MongoDB(private val context: InitApiContext): MongoRepository {
         }catch (e: Exception){
             context.logger.error(e.message.toString())
             emptyList()
+        }
+    }
+
+    override suspend fun subscribe(newsLetter: NewsLetter): String {
+        val result = newsLetterCollection
+            .find(NewsLetter::email eq newsLetter.email)
+            .toList()
+        return if (result.isNotEmpty()){
+            "You're already subscribed"
+        } else {
+            try {
+                val newEmail = newsLetterCollection
+                    .insertOne(newsLetter)
+                    .wasAcknowledged()
+                if (newEmail){
+                    "Successfully Subscribed"
+                } else {
+                    "Something went wrong. Please try again later"
+                }
+            } catch (e: Exception){
+                e.printStackTrace()
+                e.message.toString()
+            }
         }
     }
 }
